@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Dashboard - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="organization_dashboard.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="manage_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="briefcase"></i>
+                        <span class="ml-3">Manage Jobs</span>
+                    </a>
+                    <a href="manage_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="book-open"></i>
+                        <span class="ml-3">Manage Courses</span>
+                    </a>
+                    <a href="organization_profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="user"></i>
+                        <span class="ml-3">Profile</span>
+                    </a>
+                </nav>
+                <div class="mt-auto">
+                     <a href="organization_logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                         <i data-lucide="log-out"></i>
+                         <span class="ml-3">Logout</span>
+                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+             <div class="flex items-center justify-between h-16 bg-white border-b px-6 sticky top-0 z-10">
+                <h1 id="welcome-message" class="text-xl font-semibold text-gray-800">Welcome!</h1>
+                 <div class="flex items-center gap-4">
+                     <a href="manage_courses.html" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors duration-300 flex items-center gap-2">
+                         <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                         <span>New Course</span>
+                     </a>
+                     <a href="manage_jobs.html" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-300 flex items-center gap-2">
+                         <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                         <span>New Job</span>
+                     </a>
+                 </div>
+            </div>
+
+            <main class="p-6 md:p-8">
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Jobs Posted</p>
+                            <p id="jobs-posted-stat" class="text-3xl font-bold text-gray-800">...</p>
+                        </div>
+                        <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full">
+                            <i data-lucide="briefcase"></i>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Courses Listed</p>
+                            <p id="courses-listed-stat" class="text-3xl font-bold text-gray-800">...</p>
+                        </div>
+                        <div class="bg-green-100 text-green-600 p-3 rounded-full">
+                            <i data-lucide="book-open-check"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total Applicants</p>
+                            <p id="total-applicants-stat" class="text-3xl font-bold text-gray-800">...</p>
+                        </div>
+                        <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
+                            <i data-lucide="users"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Course Enrollments</p>
+                            <p id="course-enrollments-stat" class="text-3xl font-bold text-gray-800">...</p>
+                        </div>
+                        <div class="bg-orange-100 text-orange-600 p-3 rounded-full">
+                            <i data-lucide="user-check"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Active Job Listings -->
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Latest Job Postings</h2>
+                        <div id="active-jobs-list" class="space-y-4">
+                            <!-- Job items will be dynamically inserted here -->
+                        </div>
+                         <a href="manage_jobs.html" class="text-sm font-semibold text-indigo-600 hover:underline mt-6 inline-block">View All Jobs &rarr;</a>
+                    </div>
+
+                    <!-- Recent Applicants -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Recent Applicants</h2>
+                        <div id="recent-applicants-list" class="space-y-4">
+                           <!-- Applicant items will be dynamically inserted here -->
+                        </div>
+                         <a href="#" class="text-sm font-semibold text-indigo-600 hover:underline mt-6 inline-block">View All Applicants &rarr;</a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function() {
+            const welcomeMessage = document.getElementById('welcome-message');
+            
+            // Stat elements
+            const jobsCountEl = document.getElementById('jobs-posted-stat');
+            const coursesCountEl = document.getElementById('courses-listed-stat');
+            const applicantsCountEl = document.getElementById('total-applicants-stat');
+            const enrollmentsCountEl = document.getElementById('course-enrollments-stat');
+            
+            // List container elements
+            const activeJobsList = document.getElementById('active-jobs-list');
+            const recentApplicantsList = document.getElementById('recent-applicants-list');
+
+            const uniqueUrl = `api/organization_dashboard_handler.php?_=${new Date().getTime()}`;
+
+            fetch(uniqueUrl)
+                .then(async response => {
+                    if (!response.ok) {
+                        if (response.status === 401) window.location.href = 'organization_login.html';
+                        // Get the error text from the server response
+                        const errorText = await response.text();
+                        throw new Error(errorText || 'Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Populate Welcome Message
+                    welcomeMessage.textContent = `Welcome, ${data.organization_name}!`;
+                    
+                    // Populate Stat Cards
+                    jobsCountEl.textContent = data.stats.jobs_posted || 0;
+                    coursesCountEl.textContent = data.stats.courses_listed || 0;
+                    applicantsCountEl.textContent = data.stats.total_applicants || 0;
+                    enrollmentsCountEl.textContent = data.stats.course_enrollments || 0;
+
+                    // Populate Active Jobs List
+                    activeJobsList.innerHTML = '';
+                    if (data.active_jobs && data.active_jobs.length > 0) {
+                        data.active_jobs.forEach(job => {
+                            const jobItem = `
+                                <div class="flex items-center justify-between p-3 rounded-md hover:bg-gray-50">
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${job.title}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold text-gray-700">${job.applicants} Applicants</p>
+                                    </div>
+                                </div>
+                            `;
+                            activeJobsList.innerHTML += jobItem;
+                        });
+                    } else {
+                        activeJobsList.innerHTML = '<p class="text-gray-500 text-center py-4">No active job listings.</p>';
+                    }
+
+                    // Populate Recent Applicants List
+                    recentApplicantsList.innerHTML = '';
+                    if (data.recent_applicants && data.recent_applicants.length > 0) {
+                        data.recent_applicants.forEach(applicant => {
+                                const avatarInitials = applicant.name.split(' ').map(n => n[0]).join('').substring(0,2);
+                            const applicantItem = `
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold mr-3">${avatarInitials}</div>
+                                    <div>
+                                        <p class="font-semibold text-gray-700 text-sm">${applicant.name}</p>
+                                        <p class="text-xs text-gray-500">Applied for: ${applicant.role_applied}</p>
+                                    </div>
+                                </div>
+                            `;
+                            recentApplicantsList.innerHTML += applicantItem;
+                        });
+                    } else {
+                        recentApplicantsList.innerHTML = '<p class="text-gray-500 text-center py-4">No recent applicants.</p>';
+                    }
+                    
+                    lucide.createIcons();
+                })
+                .catch(error => {
+                    console.error('Error fetching dashboard data:', error.message);
+                    welcomeMessage.textContent = 'Could not load data';
+                     // Display a more helpful error on the page
+                    const mainContent = document.querySelector('main');
+                    mainContent.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                                                <p class="font-bold">Server Error</p>
+                                                <p>The dashboard could not load data. Please check the developer console (F12) for the full error message from the server.</p>
+                                             </div>`;
+                });
+        });
+    </script>
+</body>
+</html>
+

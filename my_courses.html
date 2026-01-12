@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        fetch('api/check_session.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.loggedIn) {
+                    // If the user is not logged in, force a redirect to the login page.
+                    // Using replace() is better because it removes the dashboard from the browser's history.
+                    window.location.replace('login.html');
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                // As a fallback, redirect to login if the check fails for any reason.
+                window.location.replace('login.html');
+            });
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="layout-dashboard"></i><span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="user"></i><span class="ml-3">My Profile</span>
+                    </a>
+                    <a href="my_courses.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg">
+                        <i data-lucide="book-open"></i><span class="ml-3">My Courses</span>
+                    </a>
+                    <a href="browse_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="search"></i><span class="ml-3">Browse Courses</span>
+                    </a>
+                    <a href="browse_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="briefcase"></i><span class="ml-3">Browse Jobs</span>
+                    </a>
+                    <a href="applications.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="file-text"></i><span class="ml-3">Applications</span>
+                    </a>
+                    <a href="roadmaps.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="map"></i>
+                        <span class="ml-3">Roadmaps</span>
+                    </a>
+                </nav>
+                <div class="mt-auto">
+                    <a href="logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="log-out"></i><span class="ml-3">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <header class="flex items-center justify-between h-16 bg-white border-b px-6">
+                <h1 class="text-xl font-semibold text-gray-800">My Courses</h1>
+                <div id="user-avatar-container">
+                    <img id="user-avatar-menu" src="https://placehold.co/40x40/E2E8F0/4A5568?text=U" class="w-8 h-8 rounded-full" alt="User Avatar">
+                </div>
+            </header>
+            
+            <main class="flex-grow p-6 md:p-8">
+                <div id="courses-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Course cards will be dynamically inserted here -->
+                </div>
+                <div id="loading-container" class="text-center py-20">
+                    <p class="text-gray-500">Loading your courses...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const coursesContainer = document.getElementById('courses-container');
+            const loadingContainer = document.getElementById('loading-container');
+            
+            fetch(`api/my_courses_handler.php?t=${new Date().getTime()}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingContainer.remove(); // Hide loading indicator
+                    if (data.error) {
+                         window.location.href = 'login.html';
+                    } else if (data.length === 0) {
+                        coursesContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 py-16">You are not enrolled in any courses yet. <a href="browse_courses.html" class="text-indigo-600 font-semibold hover:underline">Browse courses</a> to get started!</p>`;
+                    } else {
+                        data.forEach(course => {
+                            const courseCard = document.createElement('div');
+                            courseCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden flex flex-col';
+                            
+                            // Updated this section to make the button a link
+                            courseCard.innerHTML = `
+                                <img src="${course.thumbnail_url}" alt="${course.title}" class="w-full h-48 object-cover">
+                                <div class="p-6 flex flex-col flex-grow">
+                                    <h3 class="text-xl font-bold text-gray-800 mb-2">${course.title}</h3>
+                                    <p class="text-gray-600 mb-4 text-sm flex-grow">${course.description.substring(0, 100)}...</p>
+                                    <div>
+                                        <div class="flex justify-between mb-1">
+                                            <span class="text-base font-medium text-gray-700">Progress</span>
+                                            <span class="text-sm font-medium text-indigo-600">${course.progress}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${course.progress}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6">
+                                        <a href="course_view.html?id=${course.course_id}" class="block text-center w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
+                                            Continue Learning
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            coursesContainer.appendChild(courseCard);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching courses:', error);
+                    loadingContainer.remove();
+                    coursesContainer.innerHTML = '<p class="col-span-full text-center text-red-500 py-16">Could not load your courses. Please try again later.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
+

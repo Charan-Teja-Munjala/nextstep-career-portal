@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Courses - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+     <script>
+        fetch('api/check_session.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.loggedIn) {
+                    window.location.href = 'login.html';
+                }
+            })
+            .catch(() => window.location.href = 'login.html');
+    </script>
+    
+    <script>
+        fetch('api/check_session.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.loggedIn) {
+                    // If the user is not logged in, force a redirect to the login page.
+                    // Using replace() is better because it removes the dashboard from the browser's history.
+                    window.location.replace('login.html');
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                // As a fallback, redirect to login if the check fails for any reason.
+                window.location.replace('login.html');
+            });
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="user"></i>
+                        <span class="ml-3">My Profile</span>
+                    </a>
+                    <a href="my_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="book-open"></i>
+                        <span class="ml-3">My Courses</span>
+                    </a>
+                    <a href="browse_courses.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg">
+                        <i data-lucide="search"></i>
+                        <span class="ml-3">Browse Courses</span>
+                    </a>
+                    <a href="browse_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="search"></i>
+                        <span class="ml-3">Browse jobs</span>
+                    </a>
+                    <a href="applications.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="briefcase"></i>
+                        <span class="ml-3">Applications</span>
+                    </a>
+                    <a href="roadmaps.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="map"></i>
+                        <span class="ml-3">Roadmaps</span>
+                    </a>
+                    
+                </nav>
+                <div class="mt-auto">
+                     <a href="logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="log-out"></i>
+                        <span class="ml-3">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <div class="flex items-center justify-between h-16 bg-white border-b px-4">
+                 <div>
+                     <h1 class="text-xl font-semibold text-gray-800">Browse All Courses</h1>
+                </div>
+                 <div class="flex items-center space-x-4">
+                    <div class="relative">
+                           <img id="user-avatar-menu" src="https://placehold.co/40x40/E2E8F0/4A5568?text=U" class="w-8 h-8 rounded-full" alt="User Avatar">
+                    </div>
+                </div>
+            </div>
+            
+            <main class="p-6 md:p-8">
+                <div id="message-container" class="mb-6"></div>
+                <div id="courses-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Course cards will be inserted here by JavaScript -->
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const coursesContainer = document.getElementById('courses-container');
+            const avatarMenu = document.getElementById('user-avatar-menu');
+            const messageContainer = document.getElementById('message-container');
+
+            function loadCourses() {
+                fetch('api/browse_courses_handler.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            window.location.href = 'login.html';
+                        } else {
+                            avatarMenu.src = data.user.avatar_url;
+                            coursesContainer.innerHTML = ''; // Clear existing cards
+                            if (data.courses.length > 0) {
+                                data.courses.forEach(course => {
+                                    const buttonHtml = course.is_enrolled
+                                        ? `<a href="my_courses.html" class="mt-6 w-full text-center bg-gray-500 text-white py-2 rounded-lg cursor-pointer">View Course</a>`
+                                        : `<button data-course-id="${course.id}" class="enroll-btn mt-6 w-full text-center bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors">Enroll Now</button>`;
+
+                                    const courseCard = `
+                                        <div class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+                                            <img src="${course.thumbnail_url}" alt="${course.title}" class="w-full h-40 object-cover">
+                                            <div class="p-6 flex flex-col flex-grow">
+                                                <h3 class="text-lg font-bold text-gray-800">${course.title}</h3>
+                                                <p class="mt-2 text-sm text-gray-600 flex-grow">${course.description}</p>
+                                                ${buttonHtml}
+                                            </div>
+                                        </div>
+                                    `;
+                                    coursesContainer.innerHTML += courseCard;
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching courses:', error);
+                        coursesContainer.innerHTML = '<p class="col-span-full text-center text-red-500">Could not load courses.</p>';
+                    });
+            }
+            
+            // Function to handle enrolling in a course
+            coursesContainer.addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('enroll-btn')) {
+                    const button = e.target;
+                    const courseId = button.dataset.courseId;
+                    
+                    button.disabled = true;
+                    button.textContent = 'Enrolling...';
+
+                    fetch('api/enroll_handler.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ course_id: courseId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            displayMessage('Enrollment successful!', 'success');
+                            // Replace the button with 'View Course' link
+                            const viewCourseLink = document.createElement('a');
+                            viewCourseLink.href = 'my_courses.html';
+                            viewCourseLink.className = 'mt-6 w-full text-center bg-gray-500 text-white py-2 rounded-lg cursor-pointer';
+                            viewCourseLink.textContent = 'View Course';
+                            button.replaceWith(viewCourseLink);
+                        } else {
+                            displayMessage(data.error || 'Enrollment failed.', 'error');
+                            button.disabled = false;
+                            button.textContent = 'Enroll Now';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error enrolling:', error);
+                        displayMessage('An error occurred. Please try again.', 'error');
+                        button.disabled = false;
+                        button.textContent = 'Enroll Now';
+                    });
+                }
+            });
+
+            function displayMessage(message, type) {
+                const color = type === 'success' ? 'green' : 'red';
+                messageContainer.innerHTML = `<div class="p-4 text-sm text-${color}-700 bg-${color}-100 rounded-lg" role="alert">${message}</div>`;
+                setTimeout(() => {
+                    messageContainer.innerHTML = '';
+                }, 4000);
+            }
+
+            // Initial load of courses
+            loadCourses();
+        });
+    </script>
+</body>
+</html>
+

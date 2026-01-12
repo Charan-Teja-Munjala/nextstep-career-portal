@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextStep Hub - Your Career & Education Partner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-3xl font-bold text-indigo-600">NextStep Hub</a>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#courses" class="text-gray-600 hover:text-indigo-600">Courses</a>
+                <a href="#jobs" class="text-gray-600 hover:text-indigo-600">Jobs</a>
+                <a href="#internships" class="text-gray-600 hover:text-indigo-600">Internships</a>
+                <a href="#roadmaps" class="text-gray-600 hover:text-indigo-600">Roadmaps</a>
+            </div>
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="login.html" class="text-gray-600 hover:text-indigo-600">Log In</a>
+                <a href="signup.html" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition">Sign Up</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 space-y-2">
+            <a href="#courses" class="block text-gray-600 hover:text-indigo-600">Courses</a>
+            <a href="#jobs" class="block text-gray-600 hover:text-indigo-600">Jobs</a>
+            <a href="#internships" class="block text-gray-600 hover:text-indigo-600">Internships</a>
+            <a href="#roadmaps" class="block text-gray-600 hover:text-indigo-600">Roadmaps</a>
+            <hr class="my-2">
+            <a href="login.html" class="block text-gray-600 hover:text-indigo-600">Log In</a>
+            <a href="signup.html" class="block bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition text-center">Sign Up</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main>
+        <section class="relative bg-indigo-700 text-white py-32">
+            <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop');"></div>
+            <div class="container mx-auto px-6 text-center relative">
+                <h1 class="text-5xl font-bold mb-4">Find Your Next Step</h1>
+                <p class="text-lg mb-8 max-w-2xl mx-auto">Your one-stop platform for courses, jobs, and internships to launch your career.</p>
+                <a href="signup.html" class="bg-white text-indigo-600 font-semibold px-8 py-3 rounded-lg hover:bg-gray-200 transition text-lg">Get Started Now</a>
+            </div>
+        </section>
+
+        <!-- Featured Courses Section -->
+        <section id="courses" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-2">Featured Courses</h2>
+                <p class="text-center text-gray-600 mb-12">Handpicked courses to help you get ahead in your career.</p>
+                <div id="courses-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Dynamic course cards will be inserted here -->
+                     <p id="courses-loading" class="text-center col-span-full text-gray-500">Loading courses...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest Jobs Section -->
+        <section id="jobs" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Latest Job Openings</h2>
+                <div id="jobs-container" class="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto space-y-6">
+                    <!-- Dynamic job listings will be inserted here -->
+                     <p id="jobs-loading" class="text-center text-gray-500">Loading jobs...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Internships Section (Static Example) -->
+        <section id="internships" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Internship Opportunities</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Placeholder Card 1 -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold mb-2">Software Engineering Intern</h3>
+                        <p class="text-gray-600 mb-4">Microsoft</p>
+                        <p class="text-gray-500 text-sm">Gain hands-on experience in a fast-paced, collaborative environment.</p>
+                    </div>
+                    <!-- Placeholder Card 2 -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold mb-2">Marketing Intern</h3>
+                        <p class="text-gray-600 mb-4">HubSpot</p>
+                        <p class="text-gray-500 text-sm">Work on real marketing campaigns and learn from industry experts.</p>
+                    </div>
+                    <!-- Placeholder Card 3 -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold mb-2">Data Analyst Intern</h3>
+                        <p class="text-gray-600 mb-4">Tableau</p>
+                        <p class="text-gray-500 text-sm">Analyze real-world data sets and contribute to business insights.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <!-- How It Works Section -->
+        <section class="py-20">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl font-bold mb-12">How It Works</h2>
+                <div class="grid md:grid-cols-3 gap-12">
+                    <div class="flex flex-col items-center">
+                        <div class="bg-indigo-100 text-indigo-600 rounded-full p-6 mb-4">
+                            <i data-lucide="search" class="w-10 h-10"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">1. Discover</h3>
+                        <p class="text-gray-600">Browse our extensive catalog of courses, jobs, and career roadmaps.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="bg-indigo-100 text-indigo-600 rounded-full p-6 mb-4">
+                            <i data-lucide="award" class="w-10 h-10"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">2. Learn & Grow</h3>
+                        <p class="text-gray-600">Enroll in courses taught by industry experts to gain in-demand skills.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="bg-indigo-100 text-indigo-600 rounded-full p-6 mb-4">
+                            <i data-lucide="briefcase" class="w-10 h-10"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">3. Apply</h3>
+                        <p class="text-gray-600">Apply for jobs and internships with top companies to launch your career.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 NextStep Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- DYNAMIC DATA FETCHING ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const jobsContainer = document.getElementById('jobs-container');
+            const coursesContainer = document.getElementById('courses-container');
+            const jobsLoading = document.getElementById('jobs-loading');
+            const coursesLoading = document.getElementById('courses-loading');
+
+            fetch(`api/homepage_data_handler.php?t=${new Date().getTime()}`)
+                .then(response => response.json())
+                .then(data => {
+                    // --- Populate Jobs ---
+                    jobsLoading.remove();
+                    if (data.latest_jobs && data.latest_jobs.length > 0) {
+                        data.latest_jobs.forEach(job => {
+                            const jobElement = document.createElement('div');
+                            jobElement.className = 'flex justify-between items-center border-b border-gray-200 pb-4';
+                            
+                            const locationType = job.is_remote ? 'Remote' : job.location;
+                            
+                            jobElement.innerHTML = `
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">${job.title}</h3>
+                                    <p class="text-gray-600">${job.company_name} - <span class="text-sm text-gray-500">${locationType}</span></p>
+                                </div>
+                                <a href="#" class="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-200">View Details</a>
+                            `;
+                            jobsContainer.appendChild(jobElement);
+                        });
+                    } else {
+                        jobsContainer.innerHTML = '<p class="text-center text-gray-500">No job openings available at the moment. Check back soon!</p>';
+                    }
+
+                    // --- Populate Courses ---
+                    coursesLoading.remove();
+                    if (data.featured_courses && data.featured_courses.length > 0) {
+                        data.featured_courses.forEach(course => {
+                            const courseElement = document.createElement('div');
+                            courseElement.className = 'bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300';
+                            
+                            courseElement.innerHTML = `
+                                <img src="${course.thumbnail_url}" alt="${course.title}" class="w-full h-48 object-cover">
+                                <div class="p-6">
+                                    <h3 class="text-xl font-semibold mb-2">${course.title}</h3>
+                                    <p class="text-gray-500 text-sm mb-4">By ${course.organization_name}</p>
+                                    <p class="text-gray-600 mb-4">${course.description.substring(0, 100)}...</p>
+                                    <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-800">Learn More &rarr;</a>
+                                </div>
+                            `;
+                            coursesContainer.appendChild(courseElement);
+                        });
+                    } else {
+                        coursesContainer.innerHTML = '<p class="text-center col-span-full text-gray-500">No featured courses available right now. Please check back later.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching homepage data:', error);
+                    jobsContainer.innerHTML = '<p class="text-center text-red-500">Could not load job listings.</p>';
+                    coursesContainer.innerHTML = '<p class="text-center col-span-full text-red-500">Could not load courses.</p>';
+                });
+        });
+
+    </script>
+</body>
+</html>
+

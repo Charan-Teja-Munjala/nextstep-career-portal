@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Login - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-4xl flex bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Form Section -->
+            <div class="w-full md:w-1/2 p-8 md:p-12">
+                <h1 class="text-2xl font-bold text-indigo-600">NextStep Hub</h1>
+                <h2 class="mt-4 text-3xl font-bold text-gray-800">Welcome Back, Partner!</h2>
+                <p class="mt-2 text-gray-600">Log in to manage your courses and job postings.</p>
+                
+                <form action="organization_login_handler.php" method="POST" class="mt-8 space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Log In
+                        </button>
+                    </div>
+                </form>
+
+                <p class="mt-8 text-center text-sm text-gray-600">
+                    Don't have an account?
+                    <a href="organization_signup.html" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Sign up
+                    </a>
+                </p>
+
+                <p class="mt-17 text-center text-sm text-gray-600">
+                    <a href="forgot_password.html" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Forgot Password?
+                    </a>
+                </p>
+
+                <p class="mt-8 text-center text-sm text-gray-600">
+                    --->
+                    <a href="login.html" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Student login
+                    </a>
+                </p>
+            </div>
+            <!-- Image Section -->
+            <div class="hidden md:block md:w-1/2">
+                <img class="object-cover w-full h-full" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1769&auto=format&fit=crop" alt="Team planning">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

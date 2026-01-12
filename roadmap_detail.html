@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmap Details - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 23px; /* Centered with the 12-width icon */
+            top: 56px;
+            bottom: -16px;
+            width: 2px;
+            background-color: #e2e8f0; /* slate-200 */
+        }
+        .timeline-item.is-locked::before {
+            background-image: linear-gradient(to bottom, #e2e8f0 4px, transparent 4px);
+            background-size: 1px 8px;
+        }
+        .timeline-item:last-child::before { display: none; }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .shadow-lift {
+            transition: all 0.2s ease-out;
+        }
+        .shadow-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="layout-dashboard"></i><span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="user"></i><span class="ml-3">My Profile</span>
+                    </a>
+                    <a href="my_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="book-open"></i><span class="ml-3">My Courses</span>
+                    </a>
+                    <a href="browse_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="search"></i><span class="ml-3">Browse Courses</span>
+                    </a>
+                    <a href="browse_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="briefcase"></i><span class="ml-3">Browse Jobs</span>
+                    </a>
+                    <a href="applications.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="file-text"></i><span class="ml-3">Applications</span>
+                    </a>
+                    <a href="roadmaps.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg">
+                        <i data-lucide="map"></i><span class="ml-3">Roadmaps</span>
+                    </a>
+                </nav>
+                <div class="mt-auto">
+                    <a href="logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i data-lucide="log-out"></i><span class="ml-3">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <header class="flex items-center justify-between h-16 bg-white/80 backdrop-blur-sm border-b px-6 sticky top-0 z-20">
+                <h1 id="roadmap-title-header" class="text-xl font-semibold text-gray-800">Loading Roadmap...</h1>
+                <div>
+                    <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=U" class="w-8 h-8 rounded-full" alt="User Avatar">
+                </div>
+            </header>
+            
+            <main id="main-content" class="flex-grow p-6 md:p-8">
+                <!-- Dynamic content will be loaded here -->
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.getElementById('main-content');
+            const titleHeader = document.getElementById('roadmap-title-header');
+            const urlParams = new URLSearchParams(window.location.search);
+            const roadmapId = urlParams.get('id');
+
+            const roadmapsData = {
+                'full-stack': {
+                    title: 'Full-Stack Web Developer',
+                    description: 'Master both front-end and back-end technologies to build complete web applications.',
+                    progress: 45,
+                    color: 'indigo',
+                    stats: { courses: 8, duration: '12 Weeks' },
+                    stages: [
+                        { title: 'Stage 1: Foundations', status: 'completed', courses: [{name: 'HTML5 & CSS3 Essentials', completed: true}, {name: 'JavaScript for Beginners', completed: true}] },
+                        { title: 'Stage 2: Front-End Frameworks', status: 'in-progress', courses: [{name: 'Mastering React.js', completed: true}, {name: 'Advanced Tailwind CSS', completed: false}] },
+                        { title: 'Stage 3: Back-End Development', status: 'locked', courses: [{name: 'Node.js & Express API', completed: false}, {name: 'Introduction to SQL Databases', completed: false}] },
+                        { title: 'Stage 4: Deployment & DevOps', status: 'locked', courses: [{name: 'Docker for Developers', completed: false}, {name: 'CI/CD with GitHub Actions', completed: false}] },
+                    ]
+                },
+                'data-scientist': {
+                    title: 'Data Scientist',
+                    description: 'Learn to analyze data, build machine learning models, and extract valuable insights.',
+                    progress: 70,
+                    color: 'teal',
+                    stats: { courses: 8, duration: '16 Weeks' },
+                    stages: [
+                        { title: 'Stage 1: Python Fundamentals', status: 'completed', courses: [{name: 'Intro to Python', completed: true}, {name: 'Data Structures & Algorithms', completed: true}]},
+                        { title: 'Stage 2: Data Analysis & Visualization', status: 'completed', courses: [{name: 'Pandas & NumPy', completed: true}, {name: 'Matplotlib & Seaborn', completed: true}]},
+                        { title: 'Stage 3: Machine Learning', status: 'in-progress', courses: [{name: 'Scikit-Learn Fundamentals', completed: true}, {name: 'Deep Learning with TensorFlow', completed: false}]},
+                        { title: 'Stage 4: Big Data Technologies', status: 'locked', courses: [{name: 'Introduction to Spark', completed: false}, {name: 'SQL for Data Science', completed: false}]},
+                    ]
+                },
+                'ui-ux': {
+                    title: 'UI/UX Designer',
+                    description: 'Create intuitive, beautiful, and user-friendly interfaces for websites and applications.',
+                    progress: 15,
+                    color: 'purple',
+                    stats: { courses: 7, duration: '10 Weeks' },
+                    stages: [
+                        { title: 'Stage 1: Design Principles', status: 'in-progress', courses: [{name: 'Color Theory', completed: true}, {name: 'Typography', completed: false}, {name: 'User Psychology', completed: false}]},
+                        { title: 'Stage 2: Wireframing & Prototyping', status: 'locked', courses: [{name: 'Figma for Beginners', completed: false}, {name: 'Adobe XD Essentials', completed: false}]},
+                        { title: 'Stage 3: User Research', status: 'locked', courses: [{name: 'Conducting User Interviews', completed: false}, {name: 'Usability Testing', completed: false}]},
+                        { title: 'Stage 4: Building a Portfolio', status: 'locked', courses: [{name: 'Design Portfolio Masterclass', completed: false}]},
+                    ]
+                }
+            };
+
+            const data = roadmapsData[roadmapId];
+
+            if (!data) {
+                mainContent.innerHTML = `<div class="text-center"><p class="text-red-500 text-lg">Roadmap not found.</p></div>`;
+                titleHeader.textContent = 'Error';
+                return;
+            }
+
+            titleHeader.textContent = data.title;
+
+            const stageIcons = {
+                completed: `<i data-lucide="check-circle-2" class="w-7 h-7 text-white"></i>`,
+                'in-progress': `<i data-lucide="loader-circle" class="w-7 h-7 text-white animate-spin"></i>`,
+                locked: `<i data-lucide="lock" class="w-7 h-7 text-slate-400"></i>`,
+            };
+
+            const stageBgColors = {
+                completed: `bg-gradient-to-br from-${data.color}-500 to-${data.color}-600 shadow-lg shadow-${data.color}-500/30`,
+                'in-progress': `bg-gradient-to-br from-${data.color}-500 to-${data.color}-600 shadow-lg shadow-${data.color}-500/30`,
+                locked: 'bg-slate-200',
+            };
+            
+            let stagesHtml = '';
+            data.stages.forEach(stage => {
+                let coursesHtml = '';
+                let isNextCourseIdentified = false;
+
+                stage.courses.forEach(course => {
+                    let nextUpBadge = '';
+                    if(stage.status === 'in-progress' && !course.completed && !isNextCourseIdentified) {
+                        nextUpBadge = `<span class="ml-auto text-xs font-bold bg-${data.color}-100 text-${data.color}-800 px-2 py-1 rounded-full">NEXT UP</span>`;
+                        isNextCourseIdentified = true;
+                    }
+
+                    coursesHtml += `<li class="relative flex items-center text-slate-800 mb-3 p-4 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 shadow-lift">
+                        <i data-lucide="${course.completed ? 'check-square' : 'square'}" class="w-5 h-5 mr-4 ${course.completed ? `text-${data.color}-500` : 'text-slate-400'}"></i>
+                        <span class="font-medium">${course.name}</span>
+                        ${nextUpBadge}
+                        <a href="#" class="ml-4 text-sm font-semibold text-slate-500 hover:text-${data.color}-600">
+                           <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>
+                        </a>
+                    </li>`;
+                });
+
+                stagesHtml += `
+                    <div class="relative pl-20 pb-8 timeline-item ${stage.status === 'locked' ? 'is-locked' : ''}">
+                        <div class="absolute left-0 flex items-center justify-center w-12 h-12 rounded-full ${stageBgColors[stage.status]} border-4 border-slate-50">
+                            ${stageIcons[stage.status]}
+                        </div>
+                        <div class="bg-white p-1 rounded-xl shadow-md border border-slate-200/80 ${stage.status === 'locked' ? 'opacity-60' : ''}">
+                             <button class="w-full text-left p-4 flex justify-between items-center accordion-header">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-slate-800">${stage.title}</h4>
+                                    <p class="text-sm text-slate-500">${stage.courses.filter(c => c.completed).length} / ${stage.courses.length} courses completed</p>
+                                </div>
+                                <i data-lucide="chevron-down" class="transition-transform duration-300 text-slate-500"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <ul class="list-none px-4 pb-3">
+                                    ${coursesHtml}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            mainContent.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <!-- Header -->
+                    <div class="mb-10">
+                        <a href="roadmaps.html" class="inline-flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 mb-6">
+                            <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                            Back to All Roadmaps
+                        </a>
+                        <div class="bg-white p-8 rounded-xl shadow-md border border-slate-200/80">
+                             <h2 class="text-3xl font-bold text-slate-800">${data.title}</h2>
+                             <p class="text-slate-500 mt-2 max-w-2xl">${data.description}</p>
+                             <div class="flex flex-wrap gap-x-6 gap-y-2 mt-5 text-sm">
+                                <div class="flex items-center text-slate-700"><i data-lucide="book-copy" class="w-4 h-4 mr-2 text-${data.color}-500"></i> <span class="font-semibold">${data.stats.courses} Courses</span></div>
+                                <div class="flex items-center text-slate-700"><i data-lucide="clock" class="w-4 h-4 mr-2 text-${data.color}-500"></i> <span class="font-semibold">${data.stats.duration}</span> Est. Duration</div>
+                             </div>
+                             <div class="mt-6">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm font-semibold text-slate-700">Overall Progress</span>
+                                    <span class="text-sm font-bold text-${data.color}-600">${data.progress}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2.5">
+                                    <div class="bg-${data.color}-500 rounded-full h-2.5" style="width: ${data.progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div>
+                        ${stagesHtml}
+                    </div>
+                </div>
+            `;
+            
+            lucide.createIcons();
+            
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('[data-lucide="chevron-down"]');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 20 + "px";
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            // Auto-open the 'in-progress' stage
+            const inProgressHeader = Array.from(document.querySelectorAll('.timeline-item')).find(item => !item.classList.contains('is-locked'))?.querySelector('.accordion-header');
+            const currentStage = document.querySelector('.timeline-item:not(.is-locked):not(:has(.bg-slate-200)) .accordion-header');
+            if (currentStage) {
+                currentStage.click();
+            }
+
+        });
+    </script>
+</body>
+</html>
+

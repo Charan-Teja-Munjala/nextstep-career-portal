@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Resume Builder - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .resume-paper { 
+            font-family: 'Merriweather', serif;
+            width: 8.5in; 
+            min-height: 11in;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        @media print {
+            body, html { margin: 0; padding: 0; background-color: #fff; }
+            .no-print { display: none; }
+            .resume-paper { box-shadow: none; border: none; margin: 0; width: 100%; height: 100%;}
+            [contenteditable] { border: none !important; }
+        }
+        [contenteditable]:focus, [contenteditable]:hover {
+            outline: 2px dashed #4f46e5;
+            background-color: #eef2ff;
+            box-shadow: 0 0 0 4px #eef2ff;
+        }
+        .resume-section .section-controls {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .resume-section:hover .section-controls {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="no-print p-4 bg-white shadow-md flex justify-between items-center sticky top-0 z-10">
+        <h1 class="text-lg font-semibold">Interactive Resume Builder</h1>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label for="color-select" class="text-sm font-medium">Accent Color:</label>
+                <input type="color" id="color-select" value="#111827" class="w-8 h-8">
+            </div>
+            <button onclick="window.print()" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+                <i data-lucide="printer" class="w-5 h-5"></i>
+                Print / Save
+            </button>
+        </div>
+    </div>
+
+    <div class="p-4 md:p-8 flex justify-center">
+        <div id="resume-container" class="resume-paper bg-white text-gray-800 flex">
+            <p id="loading-message" class="text-center text-gray-500 m-auto">Generating your resume...</p>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            const resumeContainer = document.getElementById('resume-container');
+            const loadingMessage = document.getElementById('loading-message');
+            const colorPicker = document.getElementById('color-select');
+            
+            let resumeData = {};
+
+            const applyColor = (color) => {
+                resumeContainer.style.setProperty('--resume-accent-color', color);
+            };
+
+            colorPicker.addEventListener('input', (e) => applyColor(e.target.value));
+
+            function renderResume(data) {
+                const { user, education, experience } = data;
+                document.title = `Resume for ${user.name}`;
+                
+                const skillsHtml = (user.skills && user.skills.length > 0) ? user.skills.split(',').map(skill => `<li class="text-sm">${skill.trim()}</li>`).join('') : '<li>Add your skills</li>';
+                const educationHtml = education.length ? education.map(edu => `
+                    <div class="mb-4 group relative">
+                        <div class="flex justify-between items-baseline">
+                            <h4 class="font-bold text-gray-800" contenteditable="true">${edu.institution}</h4>
+                            <p class="text-sm text-gray-500" contenteditable="true">${new Date(edu.start_date || '2020-01-01').getFullYear()} - ${new Date(edu.end_date || '2024-01-01').getFullYear()}</p>
+                        </div>
+                        <p class="italic text-gray-600" contenteditable="true">${edu.degree}, ${edu.field_of_study}</p>
+                        <button class="delete-item-btn absolute -left-6 top-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                    </div>`).join('') : '<p class="text-gray-500">Add your education history.</p>';
+                
+                const experienceHtml = experience.length ? experience.map(exp => `
+                    <div class="mb-4 group relative">
+                         <div class="flex justify-between items-baseline">
+                            <h4 class="font-bold text-gray-800" contenteditable="true">${exp.company}</h4>
+                            <p class="text-sm text-gray-500" contenteditable="true">${new Date(exp.start_date || '2022-01-01').getFullYear()} - Present</p>
+                        </div>
+                        <p class="italic text-gray-600" contenteditable="true">${exp.job_title}</p>
+                        <p class="text-sm mt-1 text-gray-700" contenteditable="true">${(exp.description || 'Describe your role and accomplishments.').replace(/\n/g, '<br>')}</p>
+                        <button class="delete-item-btn absolute -left-6 top-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                    </div>`).join('') : '<p class="text-gray-500">Add your work experience.</p>';
+
+                resumeContainer.innerHTML = `
+                    <!-- Left Sidebar -->
+                    <aside class="w-1/3 bg-gray-50 p-8">
+                        <h1 class="text-4xl font-bold text-gray-900" contenteditable="true">${user.name || 'Your Name'}</h1>
+                        <p class="text-lg font-medium mt-1" style="color: var(--resume-accent-color);" contenteditable="true">${user.headline || 'Your Professional Title'}</p>
+                        
+                        <section class="mt-8">
+                            <h3 class="text-sm font-bold uppercase tracking-wider border-b-2 pb-1 mb-3" style="border-color: var(--resume-accent-color);">Contact</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i><span contenteditable="true">${user.email}</span></li>
+                                ${user.linkedin_url ? `<li class="flex items-center gap-2"><i data-lucide="linkedin" class="w-4 h-4"></i><a href="${user.linkedin_url}" class="hover:underline" contenteditable="true">LinkedIn Profile</a></li>` : ''}
+                                ${user.github_url ? `<li class="flex items-center gap-2"><i data-lucide="github" class="w-4 h-4"></i><a href="${user.github_url}" class="hover:underline" contenteditable="true">GitHub Profile</a></li>` : ''}
+                                ${user.portfolio_url ? `<li class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4"></i><a href="${user.portfolio_url}" class="hover:underline" contenteditable="true">Portfolio Website</a></li>` : ''}
+                            </ul>
+                        </section>
+                        <section class="mt-8">
+                            <h3 class="text-sm font-bold uppercase tracking-wider border-b-2 pb-1 mb-3" style="border-color: var(--resume-accent-color);">Skills</h3>
+                            <ul class="list-disc list-inside space-y-1" contenteditable="true">${skillsHtml}</ul>
+                        </section>
+                    </aside>
+
+                    <!-- Main Content -->
+                    <main class="w-2/3 p-8">
+                         <section class="resume-section">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold border-b-2 pb-1 mb-3" style="border-color: var(--resume-accent-color);">Professional Summary</h3>
+                            </div>
+                            <p class="text-gray-700 leading-relaxed text-sm" contenteditable="true">${user.bio || 'Write a brief summary about your professional background and career goals.'}</p>
+                        </section>
+
+                        <section class="mt-6 resume-section">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold border-b-2 pb-1 mb-3" style="border-color: var(--resume-accent-color);">Work Experience</h3>
+                                <div class="section-controls"><button id="add-experience" class="p-1 text-gray-400 hover:text-indigo-600"><i data-lucide="plus-circle" class="w-5 h-5"></i></button></div>
+                            </div>
+                            <div id="experience-container">${experienceHtml}</div>
+                        </section>
+
+                        <section class="mt-6 resume-section">
+                             <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold border-b-2 pb-1 mb-3" style="border-color: var(--resume-accent-color);">Education</h3>
+                                <div class="section-controls"><button id="add-education" class="p-1 text-gray-400 hover:text-indigo-600"><i data-lucide="plus-circle" class="w-5 h-5"></i></button></div>
+                            </div>
+                            <div id="education-container">${educationHtml}</div>
+                        </section>
+                    </main>
+                `;
+                applyColor(colorPicker.value);
+                lucide.createIcons();
+            }
+
+            fetch('api/resume_data_handler.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        loadingMessage.textContent = 'Could not load resume data. Please fill out your profile first.';
+                        return;
+                    }
+                    // Use dummy data if real data is empty
+                    const dummyData = {
+                        user: {
+                            name: 'Teja',
+                            headline: 'Passionate Student & Aspiring Full-Stack Developer',
+                            email: 'teja@example.com',
+                            bio: 'A highly motivated and detail-oriented computer science student with a passion for web development and problem-solving. Eager to leverage academic knowledge and hands-on project experience to contribute to a challenging role in the tech industry.',
+                            skills: 'JavaScript, HTML5, CSS3, React, Node.js, PHP, MySQL, REST APIs',
+                            linkedin_url: '#', github_url: '#', portfolio_url: '#'
+                        },
+                        education: [
+                            { id: 1, institution: 'Kakatiya Institute of Technology & Science', degree: 'Bachelor of Technology', field_of_study: 'Computer Science', start_date: '2021-08-01', end_date: '2025-05-01' }
+                        ],
+                        experience: [
+                             { id: 1, company: 'NextStep Hub Project', job_title: 'Full-Stack Developer (Academic Project)', start_date: '2024-01-01', end_date: '2024-05-01', description: 'Developed a comprehensive web platform from scratch, featuring separate portals for students and organizations. Implemented features like course enrollment, job applications, progress tracking, and certificate generation using HTML, CSS, JavaScript, and a PHP/MySQL backend.' }
+                        ]
+                    };
+                    const hasData = data.user && data.user.name && data.education.length > 0;
+                    renderResume(hasData ? data : dummyData);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    loadingMessage.textContent = 'An error occurred. Please try again.';
+                });
+
+            // --- Add/Delete Functionality ---
+            resumeContainer.addEventListener('click', e => {
+                const addExpBtn = e.target.closest('#add-experience');
+                const addEduBtn = e.target.closest('#add-education');
+                const deleteBtn = e.target.closest('.delete-item-btn');
+
+                if(addExpBtn) {
+                    const container = document.getElementById('experience-container');
+                    const newItem = document.createElement('div');
+                    newItem.className = 'mb-4 group relative';
+                    newItem.innerHTML = `<div class="flex justify-between items-baseline"><h4 class="font-bold text-gray-800" contenteditable="true">New Company</h4><p class="text-sm text-gray-500" contenteditable="true">2025 - Present</p></div><p class="italic text-gray-600" contenteditable="true">Your Title</p><p class="text-sm mt-1 text-gray-700" contenteditable="true">Describe your role...</p><button class="delete-item-btn absolute -left-6 top-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="x-circle" class="w-4 h-4"></i></button>`;
+                    container.appendChild(newItem);
+                    lucide.createIcons();
+                }
+                if(addEduBtn) {
+                    const container = document.getElementById('education-container');
+                    const newItem = document.createElement('div');
+                    newItem.className = 'mb-4 group relative';
+                    newItem.innerHTML = `<div class="flex justify-between items-baseline"><h4 class="font-bold text-gray-800" contenteditable="true">New University</h4><p class="text-sm text-gray-500" contenteditable="true">2025 - 2029</p></div><p class="italic text-gray-600" contenteditable="true">Your Degree, Field of Study</p><button class="delete-item-btn absolute -left-6 top-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="x-circle" class="w-4 h-4"></i></button>`;
+                    container.appendChild(newItem);
+                    lucide.createIcons();
+                }
+                if(deleteBtn) {
+                    deleteBtn.parentElement.remove();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

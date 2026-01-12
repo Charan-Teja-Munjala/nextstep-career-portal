@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Courses - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #add-course-form { display: none; }
+        .modal { transition: opacity 0.3s ease-in-out; }
+        .modal-body::-webkit-scrollbar { width: 8px; }
+        .modal-body::-webkit-scrollbar-track { background: #f1f1f1; }
+        .modal-body::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background: #555; }
+        .lesson-content-field { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b"><span class="text-2xl font-bold text-indigo-600">NextStep Hub</span></div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="organization_dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="layout-dashboard"></i><span class="ml-3">Dashboard</span></a>
+                    <a href="manage_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="briefcase"></i><span class="ml-3">Manage Jobs</span></a>
+                    <a href="manage_courses.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg"><i data-lucide="book-open"></i><span class="ml-3">Manage Courses</span></a>
+                    <a href="organization_profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="user"></i><span class="ml-3">Profile</span></a>
+                </nav>
+                <div class="mt-auto"><a href="organization_logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="log-out"></i><span class="ml-3">Logout</span></a></div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <div class="flex items-center justify-between h-16 bg-white border-b px-4">
+                <h1 class="text-xl font-semibold text-gray-800">Manage Courses</h1>
+                <button id="add-course-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-semibold flex items-center"><i data-lucide="plus" class="h-5 w-5 mr-2"></i>Add New Course</button>
+            </div>
+
+            <main class="p-6 md:p-8">
+                <div id="main-message-container" class="mb-4"></div>
+                <!-- Add Course Form -->
+                <div id="add-course-form" class="mb-8">
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Create a New Course</h2>
+                        <form id="course-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="courseTitle" class="block text-sm font-medium text-gray-700">Course Title</label>
+                                    <input type="text" name="courseTitle" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                                    <input type="text" name="category" placeholder="e.g., Data Science" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label for="level" class="block text-sm font-medium text-gray-700">Level</label>
+                                    <select name="level" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                        <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="duration_hours" class="block text-sm font-medium text-gray-700">Duration (in hours)</label>
+                                    <input type="number" name="duration_hours" placeholder="e.g., 20" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
+                                    <input type="text" name="language" value="English" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="thumbnailUrl" class="block text-sm font-medium text-gray-700">Thumbnail Image URL</label>
+                                <input type="url" name="thumbnailUrl" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="courseDescription" class="block text-sm font-medium text-gray-700">Course Description</label>
+                                <textarea name="courseDescription" rows="4" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                            </div>
+                            <div class="mt-6 flex justify-end space-x-4">
+                                <button type="button" id="cancel-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 font-semibold">Cancel</button>
+                                <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 font-semibold">Create Course</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Course List Table -->
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Your Listed Courses</h2>
+                    <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Title</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrolled Students</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th></tr></thead><tbody id="courses-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="edit-course-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b"><h3 class="text-xl font-semibold text-gray-800">Edit Course Details</h3><button class="text-gray-400 hover:text-gray-600 modal-close-btn"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div class="p-8 overflow-y-auto">
+                <form id="edit-course-form-actual" class="space-y-6">
+                    <input type="hidden" id="editCourseId" name="id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label for="edit_title" class="block text-sm font-medium text-gray-700">Course Title</label><input type="text" id="edit_title" name="title" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                        <div><label for="edit_category" class="block text-sm font-medium text-gray-700">Category</label><input type="text" id="edit_category" name="category" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div><label for="edit_level" class="block text-sm font-medium text-gray-700">Level</label><select id="edit_level" name="level" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
+                        <div><label for="edit_duration_hours" class="block text-sm font-medium text-gray-700">Duration (hours)</label><input type="number" id="edit_duration_hours" name="duration_hours" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                        <div><label for="edit_language" class="block text-sm font-medium text-gray-700">Language</label><input type="text" id="edit_language" name="language" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    </div>
+                    <div><label for="edit_thumbnail_url" class="block text-sm font-medium text-gray-700">Thumbnail URL</label><input type="url" id="edit_thumbnail_url" name="thumbnail_url" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    <div><label for="edit_description" class="block text-sm font-medium text-gray-700">Description</label><textarea id="edit_description" name="description" rows="4" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></textarea></div>
+                    <div class="mt-6 flex justify-end space-x-4"><button type="button" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 font-semibold modal-close-btn">Cancel</button><button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 font-semibold">Save Changes</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="manage-content-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b"><h3 id="manage-content-title" class="text-xl font-semibold text-gray-800">Manage Content</h3><button class="text-gray-400 hover:text-gray-600 modal-close-btn"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div id="manage-content-body" class="p-6 overflow-y-auto modal-body flex-grow"></div>
+        </div>
+    </div>
+    <div id="view-students-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div class="flex justify-between items-center p-4 border-b"><h3 id="view-students-title" class="text-xl font-semibold text-gray-800">Enrolled Students</h3><button class="text-gray-400 hover:text-gray-600 modal-close-btn"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div id="view-students-body" class="p-6 max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            const addCourseBtn = document.getElementById('add-course-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const addCourseForm = document.getElementById('add-course-form');
+            const courseForm = document.getElementById('course-form');
+            const coursesTableBody = document.getElementById('courses-table-body');
+            const mainMessageContainer = document.getElementById('main-message-container');
+
+            const editCourseModal = document.getElementById('edit-course-modal');
+            const manageContentModal = document.getElementById('manage-content-modal');
+            const viewStudentsModal = document.getElementById('view-students-modal');
+            const editCourseForm = document.getElementById('edit-course-form-actual');
+            
+            let allCoursesData = [];
+
+            const displayMainMessage = (message, type = 'success') => {
+                const color = type === 'success' ? 'green' : 'red';
+                mainMessageContainer.innerHTML = `<div class="p-4 mb-4 text-sm text-${color}-700 bg-${color}-100 rounded-lg" role="alert">${message}</div>`;
+                setTimeout(() => mainMessageContainer.innerHTML = '', 4000);
+            };
+
+            const openModal = (modal) => {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                lucide.createIcons();
+            };
+
+            const closeModal = (modal) => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            };
+            
+            document.querySelectorAll('.modal-close-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    closeModal(editCourseModal);
+                    closeModal(manageContentModal);
+                    closeModal(viewStudentsModal);
+                });
+            });
+
+            const fetchCourses = () => {
+                fetch(`api/manage_courses_handler.php?_=${new Date().getTime()}`)
+                    .then(res => {
+                        if (res.status === 401) window.location.href = 'organization_login.html';
+                        if (!res.ok) throw new Error('Network response was not ok.');
+                        return res.json();
+                    })
+                    .then(data => {
+                        allCoursesData = data;
+                        coursesTableBody.innerHTML = '';
+                        if (data.length === 0) {
+                            coursesTableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">You have not listed any courses yet.</td></tr>`;
+                        } else {
+                            data.forEach(course => {
+                                const viewButtonHtml = course.enrollment_count > 0 
+                                    ? `<button data-course-id="${course.id}" class="view-students-btn text-indigo-600 hover:text-indigo-900 hover:underline">View</button>` 
+                                    : '';
+
+                                const row = `<tr>
+                                    <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm font-medium text-gray-900">${course.title}</div></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center space-x-2">
+                                        <span>${course.enrollment_count}</span>
+                                        ${viewButtonHtml}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
+                                        <button data-course-id="${course.id}" class="manage-content-btn text-green-600 hover:text-green-900">Content</button>
+                                        <button data-course-id="${course.id}" class="edit-course-btn text-indigo-600 hover:text-indigo-900">Edit</button>
+                                        <button data-course-id="${course.id}" class="delete-course-btn text-red-600 hover:text-red-900">Delete</button>
+                                    </td>
+                                </tr>`;
+                                coursesTableBody.innerHTML += row;
+                            });
+                        }
+                    }).catch(error => {
+                        console.error('Error fetching courses:', error);
+                        coursesTableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-red-500">Could not load courses.</td></tr>`;
+                    });
+            };
+            
+            const loadAndRenderStudents = (courseId) => {
+                const studentsBody = document.getElementById('view-students-body');
+                studentsBody.innerHTML = '<p>Loading students...</p>';
+                fetch('api/manage_courses_handler.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_enrolled_students', course_id: courseId })
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        studentsBody.innerHTML = '';
+                        if (result.data.length === 0) {
+                            studentsBody.innerHTML = '<p>No students are enrolled in this course.</p>';
+                        } else {
+                            const list = document.createElement('ul');
+                            list.className = 'space-y-3';
+                            result.data.forEach(student => {
+                                list.innerHTML += `<li class="p-2 border-b">
+                                    <p class="font-semibold">${student.name}</p>
+                                    <p class="text-sm text-gray-500">${student.email}</p>
+                                </li>`;
+                            });
+                            studentsBody.appendChild(list);
+                        }
+                    } else {
+                        studentsBody.innerHTML = `<p class="text-red-500">${result.message}</p>`;
+                    }
+                });
+            };
+            
+            const loadAndRenderContent = (courseId) => {
+                 const contentBody = document.getElementById('manage-content-body');
+                 contentBody.innerHTML = '<p>Loading content...</p>';
+                 fetch('api/manage_courses_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get_content', course_id: courseId }) })
+                 .then(res => res.json())
+                 .then(result => {
+                    if (result.success) {
+                        renderContent(courseId, result.data);
+                    } else {
+                        contentBody.innerHTML = `<p class="text-red-500">${result.message}</p>`;
+                    }
+                 });
+            };
+
+            const renderContent = (courseId, modules) => {
+                const contentBody = document.getElementById('manage-content-body');
+                contentBody.innerHTML = '';
+
+                if(modules.length === 0){
+                    contentBody.innerHTML += `<p class="text-center text-gray-500 mb-6">No modules have been added yet.</p>`;
+                } else {
+                    modules.forEach(module => {
+                        const moduleEl = document.createElement('div');
+                        moduleEl.className = 'mb-6 p-4 border rounded-lg bg-gray-50';
+                        let lessonsHtml = '<ul class="mt-2 space-y-2 pl-1">';
+                        if(module.lessons.length > 0){
+                            module.lessons.forEach(lesson => {
+                                let icon;
+                                switch(lesson.lesson_type) {
+                                    case 'video': icon = 'youtube'; break;
+                                    case 'reading': icon = 'file-text'; break;
+                                    case 'document': icon = 'file-check-2'; break;
+                                    default: icon = 'file';
+                                }
+                                lessonsHtml += `<li class="text-sm text-gray-700 flex justify-between items-center p-2 rounded-md hover:bg-gray-100">
+                                    <span class="flex items-center"><i data-lucide="${icon}" class="w-4 h-4 mr-2 text-gray-500"></i>${lesson.title}</span>
+                                    <button class="delete-lesson-btn text-red-500 hover:text-red-700 opacity-50 hover:opacity-100" data-lesson-id="${lesson.id}"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                </li>`;
+                            });
+                        } else {
+                             lessonsHtml += `<li class="text-sm text-gray-400 italic">No lessons in this module yet.</li>`;
+                        }
+                        lessonsHtml += '</ul>';
+
+                        moduleEl.innerHTML = `
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-semibold text-lg text-gray-800">${module.title}</h4>
+                                <button class="delete-module-btn text-red-500 hover:text-red-700" data-module-id="${module.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                            ${lessonsHtml}
+                            <form class="add-lesson-form mt-4 space-y-2 border-t pt-4" data-module-id="${module.id}">
+                                <input type="text" name="title" placeholder="New Lesson Title" class="w-full p-2 border rounded-md" required>
+                                
+                                <select name="lesson_type" class="w-full p-2 border rounded-md lesson-type-select">
+                                    <option value="video" selected>Video (YouTube URL)</option>
+                                    <option value="reading">Reading (Text Content)</option>
+                                    <option value="document">Document (PDF URL)</option>
+                                </select>
+                                
+                                <div class="lesson-content-field video-field" style="display:block;">
+                                    <input type="url" name="video_url" placeholder="e.g., https://www.youtube.com/watch?v=..." class="w-full p-2 border rounded-md">
+                                </div>
+                                <div class="lesson-content-field reading-field" style="display:none;">
+                                    <textarea name="text_content" placeholder="Enter reading content here..." rows="5" class="w-full p-2 border rounded-md"></textarea>
+                                </div>
+                                <div class="lesson-content-field document-field" style="display:none;">
+                                     <input type="url" name="document_url" placeholder="e.g., https://example.com/document.pdf" class="w-full p-2 border rounded-md">
+                                </div>
+
+                                <button type="submit" class="bg-blue-500 text-white px-3 py-1 text-sm rounded hover:bg-blue-600">Add Lesson</button>
+                            </form>
+                        `;
+                        contentBody.appendChild(moduleEl);
+                    });
+                }
+
+                const addModuleForm = document.createElement('div');
+                addModuleForm.innerHTML = `
+                    <hr class="my-6">
+                    <h4 class="font-semibold text-lg mb-2">Add a New Module</h4>
+                    <form id="add-module-form" class="space-y-2">
+                        <input type="text" id="new-module-title" placeholder="New Module Title" class="w-full p-2 border rounded-md" required>
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Add Module</button>
+                    </form>
+                `;
+                contentBody.appendChild(addModuleForm);
+                lucide.createIcons();
+            };
+
+            // --- ALL EVENT LISTENERS CONSOLIDATED HERE ---
+            addCourseBtn.addEventListener('click', () => addCourseForm.style.display = 'block');
+            cancelBtn.addEventListener('click', () => addCourseForm.style.display = 'none');
+            
+            courseForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target); // Use e.target for the form
+                const data = { action: 'create' };
+                // Manually add all fields
+                formData.forEach((value, key) => { data[key] = value; });
+
+                fetch('api/manage_courses_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+                .then(res => res.json()).then(result => {
+                    displayMainMessage(result.message, result.success ? 'success' : 'error');
+                    if (result.success) {
+                        courseForm.reset();
+                        addCourseForm.style.display = 'none';
+                        fetchCourses();
+                    }
+                });
+            });
+
+            coursesTableBody.addEventListener('click', e => {
+                const target = e.target.closest('button');
+                if (!target) return;
+                const courseId = target.dataset.courseId; // Correctly get courseId
+
+                if (target.classList.contains('edit-course-btn')) {
+                    const course = allCoursesData.find(c => c.id == courseId);
+                    if (course) {
+                        // Populate all fields for editing
+                        document.getElementById('editCourseId').value = course.id;
+                        document.getElementById('edit_title').value = course.title;
+                        document.getElementById('edit_category').value = course.category || 'General'; // Default if null
+                        document.getElementById('edit_level').value = course.level || 'Beginner'; // Default if null
+                        document.getElementById('edit_duration_hours').value = course.duration_hours || '';
+                        document.getElementById('edit_language').value = course.language || 'English'; // Default if null
+                        document.getElementById('edit_thumbnail_url').value = course.thumbnail_url || '';
+                        document.getElementById('edit_description').value = course.description || '';
+                        openModal(editCourseModal);
+                    }
+                }
+
+                if (target.classList.contains('delete-course-btn')) {
+                    if (confirm('Are you sure you want to delete this course and all its content? This action is permanent.')) {
+                        fetch('api/manage_courses_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id: courseId }) })
+                        .then(res => res.json()).then(data => {
+                            displayMainMessage(data.message, data.success ? 'success' : 'error');
+                            if (data.success) fetchCourses();
+                        });
+                    }
+                }
+
+                if (target.classList.contains('manage-content-btn')) {
+                    const course = allCoursesData.find(c => c.id == courseId);
+                    document.getElementById('manage-content-title').innerText = `Content for: ${course.title}`;
+                    loadAndRenderContent(courseId);
+                    openModal(manageContentModal);
+                }
+                
+                if (target.classList.contains('view-students-btn')) {
+                    const course = allCoursesData.find(c => c.id == courseId);
+                    document.getElementById('view-students-title').innerText = `Students in: ${course.title}`;
+                    loadAndRenderStudents(courseId);
+                    openModal(viewStudentsModal);
+                }
+            });
+
+            editCourseForm.addEventListener('submit', e => {
+                e.preventDefault();
+                const formData = new FormData(e.target); // Use e.target for the form
+                const updatedData = { action: 'update' };
+                // Manually add all fields
+                formData.forEach((value, key) => { updatedData[key] = value; });
+
+                fetch('api/manage_courses_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedData) })
+                .then(res => res.json()).then(data => {
+                    displayMainMessage(data.message, data.success ? 'success' : 'error');
+                    if (data.success) {
+                        closeModal(editCourseModal);
+                        fetchCourses();
+                    }
+                });
+            });
+
+            manageContentModal.addEventListener('change', e => {
+                if(e.target.classList.contains('lesson-type-select')) {
+                    const form = e.target.closest('.add-lesson-form');
+                    form.querySelectorAll('.lesson-content-field').forEach(field => field.style.display = 'none');
+                    const selectedField = form.querySelector(`.${e.target.value}-field`);
+                    if(selectedField) selectedField.style.display = 'block';
+                }
+            });
+
+            manageContentModal.addEventListener('click', e => {
+                const courseId = allCoursesData.find(c => `Content for: ${c.title}` === document.getElementById('manage-content-title').innerText)?.id;
+
+                const deleteModuleBtn = e.target.closest('.delete-module-btn');
+                if (deleteModuleBtn) {
+                    const moduleId = deleteModuleBtn.dataset.moduleId;
+                    if (confirm('Are you sure you want to delete this module and all its lessons?')) {
+                        fetch('api/manage_courses_handler.php', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ action: 'delete_module', module_id: moduleId }) })
+                        .then(() => loadAndRenderContent(courseId));
+                    }
+                }
+
+                const deleteLessonBtn = e.target.closest('.delete-lesson-btn');
+                if (deleteLessonBtn) {
+                    const lessonId = deleteLessonBtn.dataset.lessonId;
+                     if (confirm('Are you sure you want to delete this lesson?')) {
+                        fetch('api/manage_courses_handler.php', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ action: 'delete_lesson', lesson_id: lessonId }) })
+                       .then(() => loadAndRenderContent(courseId));
+                    }
+                }
+            });
+
+            manageContentModal.addEventListener('submit', e => {
+                e.preventDefault();
+                const courseId = allCoursesData.find(c => `Content for: ${c.title}` === document.getElementById('manage-content-title').innerText)?.id;
+
+                if (e.target.matches('#add-module-form')) {
+                    const title = document.getElementById('new-module-title').value;
+                    fetch('api/manage_courses_handler.php', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ action: 'add_module', course_id: courseId, title: title }) })
+                    .then(() => loadAndRenderContent(courseId));
+                }
+
+                if (e.target.matches('.add-lesson-form')) {
+                    const moduleId = e.target.dataset.moduleId;
+                    const title = e.target.querySelector('input[name="title"]').value;
+                    const lessonType = e.target.querySelector('select[name="lesson_type"]').value;
+                    
+                    let lessonData = { action: 'add_lesson', module_id: moduleId, title: title, lesson_type: lessonType };
+
+                    if (lessonType === 'video') {
+                        lessonData.video_url = e.target.querySelector('input[name="video_url"]').value;
+                    } else if (lessonType === 'reading') {
+                        lessonData.content = e.target.querySelector('textarea[name="text_content"]').value;
+                    } else if (lessonType === 'document') {
+                        lessonData.content = e.target.querySelector('input[name="document_url"]').value;
+                    }
+                    
+                     fetch('api/manage_courses_handler.php', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(lessonData) })
+                    .then(() => loadAndRenderContent(courseId));
+                }
+            });
+
+            // --- Initial Load ---
+            fetchCourses();
+        });
+    </script>
+</body>
+</html>
+

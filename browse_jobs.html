@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Jobs - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        // Security check to ensure user is logged in
+        fetch('api/check_session.php').then(response => response.json()).then(data => {
+            if (!data.loggedIn) { window.location.replace('login.html'); }
+        }).catch(() => window.location.replace('login.html'));
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .modal { 
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal.flex {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+             <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="layout-dashboard"></i><span class="ml-3">Dashboard</span></a>
+                    <a href="profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="user"></i><span class="ml-3">My Profile</span></a>
+                    <a href="my_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="book-open"></i><span class="ml-3">My Courses</span></a>
+                    <a href="browse_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="search"></i><span class="ml-3">Browse Courses</span></a>
+                    <a href="browse_jobs.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg"><i data-lucide="briefcase"></i><span class="ml-3">Browse Jobs</span></a>
+                    <a href="applications.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="file-text"></i><span class="ml-3">Applications</span></a>
+                    <a href="roadmaps.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="map"></i><span class="ml-3">Roadmaps</span></a>
+                </nav>
+                <div class="mt-auto"><a href="logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="log-out"></i><span class="ml-3">Logout</span></a></div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <header class="flex items-center justify-between h-16 bg-white border-b px-6 sticky top-0 z-10">
+                <h1 class="text-xl font-semibold text-gray-800">Browse Job Openings</h1>
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 text-gray-500 bg-gray-100 rounded-full hover:bg-gray-200"><i data-lucide="bell"></i></button>
+                    <img id="user-avatar-menu" src="https://placehold.co/40x40/E2E8F0/4A5568?text=U" class="w-8 h-8 rounded-full" alt="User Avatar">
+                </div>
+            </header>
+            
+            <main class="p-6 md:p-8">
+                <div id="message-container" class="mb-4"></div>
+                <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic job cards will be inserted here -->
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Job Details Modal -->
+    <div id="job-details-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-semibold text-gray-800">Job Details</h3>
+                <button class="text-gray-400 hover:text-gray-600 modal-close-btn"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div id="modal-body" class="p-6 overflow-y-auto"></div>
+            <div id="modal-footer" class="p-4 bg-gray-50 border-t flex justify-end"></div>
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const jobsContainer = document.getElementById('jobs-container');
+            const messageContainer = document.getElementById('message-container');
+            const jobDetailsModal = document.getElementById('job-details-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalFooter = document.getElementById('modal-footer');
+            let allJobsData = [];
+
+            const displayMessage = (message, type = 'success') => {
+                const color = type === 'success' ? 'green' : 'red';
+                messageContainer.innerHTML = `<div class="p-4 text-sm text-${color}-700 bg-${color}-100 rounded-lg" role="alert">${message}</div>`;
+                setTimeout(() => { messageContainer.innerHTML = ''; }, 4000);
+            };
+            const openModal = () => { jobDetailsModal.classList.remove('hidden'); jobDetailsModal.classList.add('flex'); };
+            const closeModal = () => { jobDetailsModal.classList.add('hidden'); jobDetailsModal.classList.remove('flex'); };
+
+            document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', closeModal));
+
+            const renderJobs = () => {
+                jobsContainer.innerHTML = ''; 
+                if (allJobsData.length === 0) {
+                    jobsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-16">No job openings are available at the moment.</p>';
+                    return;
+                }
+
+                allJobsData.forEach(job => {
+                    const jobCard = document.createElement('div');
+                    jobCard.className = 'bg-white rounded-lg shadow-sm p-6 flex flex-col hover:shadow-lg transition-shadow';
+                    
+                    const buttonDisabled = job.has_applied ? 'disabled' : '';
+                    const buttonText = job.has_applied ? 'Applied' : 'Apply Now';
+                    const buttonClasses = job.has_applied ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700';
+
+                    jobCard.innerHTML = `
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-gray-800">${job.title}</h3>
+                                <span class="text-xs font-semibold px-2 py-1 rounded-full ${job.is_remote == 1 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">${job.is_remote == 1 ? 'Remote' : job.job_type}</span>
+                            </div>
+                            <p class="text-sm font-semibold text-indigo-600 mb-3">${job.company_name}</p>
+                            <div class="flex items-center text-sm text-gray-500 mb-2"><i data-lucide="map-pin" class="w-4 h-4 mr-2"></i><span>${job.location}</span></div>
+                            <div class="flex items-center text-sm text-gray-500 mb-4"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i><span>Posted: ${job.formatted_date}</span></div>
+                            <p class="text-gray-600 text-sm">${job.description.substring(0, 100)}...</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-100 flex items-center gap-2">
+                            <button data-job-id="${job.id}" class="view-details-btn w-1/2 px-4 py-2 rounded-lg font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm">View Details</button>
+                            <button data-job-id="${job.id}" class="apply-btn-card w-1/2 px-4 py-2 rounded-lg font-semibold text-sm ${buttonClasses}" ${buttonDisabled}>${buttonText}</button>
+                        </div>
+                    `;
+                    jobsContainer.appendChild(jobCard);
+                });
+                lucide.createIcons();
+            };
+            
+            const fetchAndRenderJobs = () => {
+                fetch(`api/browse_jobs_handler.php?t=${new Date().getTime()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            window.location.href = 'login.html';
+                        } else {
+                            allJobsData = data;
+                            renderJobs();
+                        }
+                    });
+            };
+
+            const handleApply = (jobId, button) => {
+                button.disabled = true;
+                button.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>`;
+
+                fetch('api/apply_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ job_id: jobId }) })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayMessage(data.message, 'success');
+                        const job = allJobsData.find(j => j.id == jobId);
+                        if(job) job.has_applied = true;
+                        renderJobs(); 
+                        closeModal();
+                    } else {
+                        displayMessage(data.message || 'An error occurred.', 'error');
+                        button.disabled = false;
+                        button.textContent = 'Apply Now';
+                    }
+                });
+            };
+
+            jobsContainer.addEventListener('click', function(e) {
+                const viewBtn = e.target.closest('.view-details-btn');
+                const applyBtn = e.target.closest('.apply-btn-card');
+                
+                if (viewBtn) {
+                    const jobId = viewBtn.dataset.jobId;
+                    const job = allJobsData.find(j => j.id == jobId);
+
+                    modalTitle.textContent = job.title;
+                    modalBody.innerHTML = `
+                        <p class="text-lg font-semibold text-indigo-700 mb-2">${job.company_name}</p>
+                        <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600 mb-4 border-b pb-4">
+                            <span class="flex items-center"><i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>${job.location}</span>
+                            <span class="flex items-center"><i data-lucide="briefcase" class="w-4 h-4 mr-2"></i>${job.job_type}</span>
+                            <span class="flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-2"></i>${job.experience_level}</span>
+                            ${job.salary_range ? `<span class="flex items-center"><i data-lucide="dollar-sign" class="w-4 h-4 mr-2"></i>${job.salary_range}</span>` : ''}
+                            <span class="flex items-center"><i data-lucide="users" class="w-4 h-4 mr-2"></i>${job.applicant_count} Applicants</span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mt-6 mb-2">Job Description</h4>
+                        <p class="text-gray-600">${job.description.replace(/\n/g, '<br>')}</p>
+                        <h4 class="font-bold text-gray-800 mt-6 mb-2">Requirements</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1">${(job.requirements || '').split('\n').map(r => `<li>${r}</li>`).join('')}</ul>
+                    `;
+                    
+                    const buttonDisabled = job.has_applied ? 'disabled' : '';
+                    const buttonText = job.has_applied ? 'Already Applied' : 'Apply Now';
+                    const buttonClasses = job.has_applied ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700';
+
+                    modalFooter.innerHTML = `<button data-job-id="${job.id}" class="apply-btn-modal px-6 py-2 rounded-lg font-semibold ${buttonClasses}" ${buttonDisabled}>${buttonText}</button>`;
+                    lucide.createIcons();
+                    openModal();
+                }
+
+                if (applyBtn && !applyBtn.disabled) {
+                    handleApply(applyBtn.dataset.jobId, applyBtn);
+                }
+            });
+            
+            modalFooter.addEventListener('click', function(e) {
+                const applyBtn = e.target.closest('.apply-btn-modal');
+                if (applyBtn && !applyBtn.disabled) {
+                    handleApply(applyBtn.dataset.jobId, applyBtn);
+                }
+            });
+            
+            fetchAndRenderJobs();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Profile - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="organization_dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="manage_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="briefcase"></i>
+                        <span class="ml-3">Manage Jobs</span>
+                    </a>
+                    <a href="manage_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="book-open"></i>
+                        <span class="ml-3">Manage Courses</span>
+                    </a>
+                    <a href="organization_profile.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg">
+                        <i data-lucide="user"></i>
+                        <span class="ml-3">Profile</span>
+                    </a>
+                </nav>
+                 <div class="mt-auto">
+                     <a href="organization_logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="log-out"></i>
+                        <span class="ml-3">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <div class="flex items-center justify-between h-16 bg-white border-b px-4">
+                <h1 class="text-xl font-semibold text-gray-800">Organization Profile</h1>
+            </div>
+            
+            <main class="p-6 md:p-8">
+                <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Profile Information</h2>
+                    
+                    <div id="message-container" class="mb-4"></div>
+
+                    <form id="profile-form">
+                        <!-- Organization Name & Email -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="orgName" class="block text-sm font-medium text-gray-700">Organization Name</label>
+                                <input type="text" id="orgName" name="orgName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                                <input type="email" id="email" name="email" readonly class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <!-- Website & Description -->
+                        <div class="grid grid-cols-1 gap-6 mt-6">
+                             <div>
+                                <label for="websiteUrl" class="block text-sm font-medium text-gray-700">Website URL</label>
+                                <input type="url" id="websiteUrl" name="websiteUrl" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="https://www.example.com">
+                            </div>
+                            <div>
+                                <label for="description" class="block text-sm font-medium text-gray-700">About the Organization</label>
+                                <textarea id="description" name="description" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                            </div>
+                        </div>
+
+                        <hr class="my-8">
+
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Change Password</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="newPassword" class="block text-sm font-medium text-gray-700">New Password</label>
+                                <input type="password" id="newPassword" name="newPassword" placeholder="Leave blank to keep current password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+
+                        <div class="mt-8 text-right">
+                            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- FORM ELEMENTS ---
+            const profileForm = document.getElementById('profile-form');
+            const orgNameInput = document.getElementById('orgName');
+            const emailInput = document.getElementById('email');
+            const websiteUrlInput = document.getElementById('websiteUrl');
+            const descriptionInput = document.getElementById('description');
+            const messageContainer = document.getElementById('message-container');
+
+            // --- FETCH DATA ON PAGE LOAD ---
+            fetch('api/organization_profile_handler.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        window.location.href = 'organization_login.html';
+                    } else {
+                        orgNameInput.value = data.name || '';
+                        emailInput.value = data.email || '';
+                        websiteUrlInput.value = data.website_url || '';
+                        descriptionInput.value = data.description || '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching profile data:', error);
+                    displayMessage('Could not load profile data. Please try again.', 'error');
+                });
+
+            // --- HANDLE FORM SUBMISSION ---
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (newPassword !== confirmPassword) {
+                    displayMessage('New passwords do not match.', 'error');
+                    return;
+                }
+
+                const formData = {
+                    orgName: orgNameInput.value,
+                    websiteUrl: websiteUrlInput.value,
+                    description: descriptionInput.value,
+                    newPassword: newPassword
+                };
+
+                fetch('api/organization_profile_handler.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayMessage(data.message, 'success');
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                    } else {
+                        displayMessage(data.message || 'An error occurred.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating profile:', error);
+                    displayMessage('Could not update profile. Please try again.', 'error');
+                });
+            });
+
+            // --- HELPER FUNCTION FOR MESSAGES ---
+            function displayMessage(message, type) {
+                const color = type === 'success' ? 'green' : 'red';
+                messageContainer.innerHTML = `<div class="p-4 text-sm text-${color}-700 bg-${color}-100 rounded-lg" role="alert">${message}</div>`;
+                setTimeout(() => { messageContainer.innerHTML = ''; }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
+

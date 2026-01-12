@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #4f46e5;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md">
+        <div class="bg-white p-8 md:p-10 rounded-xl shadow-lg">
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Set New Password</h1>
+                <p class="text-gray-500 mt-2">Enter the code from your email and your new password.</p>
+            </div>
+
+            <div id="message-area" class="mb-4"></div>
+
+            <form id="reset-form">
+                <div class="space-y-4">
+                    <div>
+                        <label for="otp" class="block text-sm font-medium text-gray-700 mb-1">Verification Code (OTP)</label>
+                        <input type="text" id="otp" name="otp" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                               placeholder="Enter 6-digit code">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                        <input type="password" id="password" name="password" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                               placeholder="Enter new password (min. 8 characters)">
+                    </div>
+                     <div>
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                        <input type="password" id="confirm-password" name="confirm-password" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                               placeholder="Confirm your new password">
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <button type="submit" id="submit-button" class="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300 flex items-center justify-center">
+                        <span class="btn-text">Reset Password</span>
+                        <div class="loader hidden"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="text-center mt-4">
+             <a href="login.html" class="text-sm text-indigo-600 hover:underline">Back to Login</a>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('reset-form');
+            const messageArea = document.getElementById('message-area');
+            const submitButton = document.getElementById('submit-button');
+            const buttonText = submitButton.querySelector('.btn-text');
+            const loader = submitButton.querySelector('.loader');
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                messageArea.innerHTML = ''; // Clear previous messages
+
+                const otp = document.getElementById('otp').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+
+                if (password !== confirmPassword) {
+                    displayMessage('Passwords do not match.', 'error');
+                    return;
+                }
+                
+                if (password.length < 8) {
+                    displayMessage('Password must be at least 8 characters long.', 'error');
+                    return;
+                }
+
+                setLoading(true);
+
+                // --- API Call ---
+                // This will send the data to our final PHP script
+                fetch('api/verify_and_reset.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp: otp, password: password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    displayMessage(data.message, 'success');
+                    form.reset();
+                    submitButton.style.display = 'none'; // Hide the button
+                    // Add a login link
+                    messageArea.innerHTML += '<div class="mt-4 text-center"><a href="login.html" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">Proceed to Login</a></div>';
+
+                })
+                .catch(error => {
+                    displayMessage(error.message, 'error');
+                })
+                .finally(() => {
+                    // Only reset loading state on error, on success the button is hidden
+                    if (!messageArea.innerHTML.includes('success')) {
+                       setLoading(false);
+                    }
+                });
+            });
+
+            function displayMessage(message, type) {
+                const color = type === 'success' ? 'green' : 'red';
+                messageArea.innerHTML = `<div class="p-4 rounded-lg bg-${color}-100 text-${color}-700 text-sm">${message}</div>`;
+            }
+
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    submitButton.disabled = true;
+                    buttonText.classList.add('hidden');
+                    loader.classList.remove('hidden');
+                } else {
+                    submitButton.disabled = false;
+                    buttonText.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

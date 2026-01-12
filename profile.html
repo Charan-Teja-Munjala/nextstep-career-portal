@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        fetch('api/check_session.php').then(response => response.json()).then(data => {
+            if (!data.loggedIn) { window.location.replace('login.html'); }
+        }).catch(() => window.location.replace('login.html'));
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .tab-button.active {
+            border-bottom-color: #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+             <div class="flex items-center justify-center h-16 border-b"><span class="text-2xl font-bold text-indigo-600">NextStep Hub</span></div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="layout-dashboard"></i><span class="ml-3">Dashboard</span></a>
+                    <a href="profile.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg"><i data-lucide="user"></i><span class="ml-3">My Profile</span></a>
+                    <a href="my_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="book-open"></i><span class="ml-3">My Courses</span></a>
+                    <a href="browse_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="search"></i><span class="ml-3">Browse Courses</span></a>
+                    <a href="browse_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="briefcase"></i><span class="ml-3">Browse Jobs</span></a>
+                    <a href="applications.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="file-text"></i><span class="ml-3">Applications</span></a>
+                    <a href="roadmaps.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="map"></i><span class="ml-3">Roadmaps</span></a>
+                </nav>
+                <div class="mt-auto"><a href="logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg"><i data-lucide="log-out"></i><span class="ml-3">Logout</span></a></div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <header class="flex items-center justify-between h-16 bg-white border-b px-6">
+                <h1 class="text-xl font-semibold text-gray-800">My Profile</h1>
+            </header>
+            
+            <main class="p-6 md:p-8">
+                <div id="message-container" class="mb-6 max-w-7xl mx-auto"></div>
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Profile Picture and Info -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-lg shadow-sm p-6 text-center">
+                            <img id="avatar-img" src="https://placehold.co/128x128/E2E8F0/4A5568?text=U" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover ring-4 ring-indigo-100">
+                            <h2 id="profile-name" class="text-2xl font-bold text-gray-800">Loading...</h2>
+                            <p id="profile-headline" class="text-gray-500">No headline yet.</p>
+                            <input type="text" id="avatar_url" name="avatar_url" class="hidden">
+                            <button id="upload-btn" class="mt-4 w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 text-sm">Change Picture</button>
+                            <!-- NEW BUTTON ADDED HERE -->
+                            <a href="resume1.html" target="resume.html" id="resume-btn" class="mt-2 w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 text-sm flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>Generate Resume
+                            </a>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Profile Details Form with Tabs -->
+                    <div class="lg:col-span-2 bg-white rounded-lg shadow-sm">
+                        <div class="border-b border-gray-200">
+                             <nav class="flex -mb-px px-6" aria-label="Tabs">
+                                <button class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="account">Account Information</button>
+                                <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 ml-8" data-tab="professional">Professional Details</button>
+                                <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 ml-8" data-tab="security">Security</button>
+                            </nav>
+                        </div>
+                        <form id="profile-form" class="p-8">
+                            <!-- Account Tab -->
+                            <div id="tab-account" class="tab-content active space-y-6">
+                                <div>
+                                    <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                    <input type="text" id="fullName" name="fullName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                                    <input type="email" id="email" name="email" readonly class="mt-1 block w-full px-3 py-2 bg-gray-100 cursor-not-allowed border border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                            <!-- Professional Tab -->
+                            <div id="tab-professional" class="tab-content space-y-6">
+                                <div>
+                                    <label for="headline" class="block text-sm font-medium text-gray-700">Headline</label>
+                                    <input type="text" id="headline" name="headline" placeholder="e.g., Aspiring Full-Stack Developer" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="bio" class="block text-sm font-medium text-gray-700">About Me / Bio</label>
+                                    <textarea id="bio" name="bio" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                                </div>
+                                <div>
+                                    <label for="skills" class="block text-sm font-medium text-gray-700">Skills</label>
+                                    <input type="text" id="skills" name="skills" placeholder="e.g., JavaScript, React, PHP, SQL" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <p class="mt-1 text-xs text-gray-500">Separate skills with a comma.</p>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="linkedin_url" class="block text-sm font-medium text-gray-700">LinkedIn URL</label>
+                                        <input type="url" id="linkedin_url" name="linkedin_url" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    </div>
+                                    <div>
+                                        <label for="github_url" class="block text-sm font-medium text-gray-700">GitHub URL</label>
+                                        <input type="url" id="github_url" name="github_url" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    </div>
+                                </div>
+                                 <div>
+                                    <label for="portfolio_url" class="block text-sm font-medium text-gray-700">Portfolio URL</label>
+                                    <input type="url" id="portfolio_url" name="portfolio_url" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                            <!-- Security Tab -->
+                            <div id="tab-security" class="tab-content space-y-6">
+                                <div>
+                                    <label for="newPassword" class="block text-sm font-medium text-gray-700">New Password</label>
+                                    <input type="password" id="newPassword" name="newPassword" placeholder="Leave blank to keep current password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                            <div class="mt-8 text-right">
+                                <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileForm = document.getElementById('profile-form');
+            const messageContainer = document.getElementById('message-container');
+            const avatarImg = document.getElementById('avatar-img');
+            const profileName = document.getElementById('profile-name');
+            const profileHeadline = document.getElementById('profile-headline');
+            const uploadBtn = document.getElementById('upload-btn');
+            const avatarUrlInput = document.getElementById('avatar_url');
+
+            const allFields = ['fullName', 'email', 'headline', 'bio', 'skills', 'linkedin_url', 'github_url', 'portfolio_url', 'avatar_url'];
+            
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(`tab-${button.dataset.tab}`).classList.add('active');
+                });
+            });
+
+            fetch('api/profile_handler.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) { window.location.href = 'login.html'; } 
+                    else {
+                        document.getElementById('fullName').value = data.name || '';
+                        document.getElementById('email').value = data.email || '';
+                        document.getElementById('headline').value = data.headline || '';
+                        document.getElementById('bio').value = data.bio || '';
+                        document.getElementById('skills').value = data.skills || '';
+                        document.getElementById('linkedin_url').value = data.linkedin_url || '';
+                        document.getElementById('github_url').value = data.github_url || '';
+                        document.getElementById('portfolio_url').value = data.portfolio_url || '';
+                        avatarUrlInput.value = data.avatar_url || '';
+                        
+                        avatarImg.src = data.avatar_url || 'https://placehold.co/128x128/E2E8F0/4A5568?text=U';
+                        profileName.textContent = data.name || 'User';
+                        profileHeadline.textContent = data.headline || 'No headline yet.';
+                    }
+                });
+
+            uploadBtn.addEventListener('click', () => {
+                const newUrl = prompt('Please paste a URL for your new profile picture:');
+                if(newUrl) {
+                    avatarImg.src = newUrl;
+                    avatarUrlInput.value = newUrl;
+                }
+            });
+
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const newPassword = document.getElementById('newPassword').value;
+                if (newPassword && newPassword !== document.getElementById('confirmPassword').value) {
+                    displayMessage('New passwords do not match.', 'error');
+                    return;
+                }
+
+                const formData = new FormData(profileForm);
+                const data = {};
+                for(let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                 // Manually add avatar_url since it's hidden
+                data.avatar_url = avatarUrlInput.value;
+
+                fetch('api/profile_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+                .then(res => res.json())
+                .then(result => {
+                    displayMessage(result.message, result.success ? 'success' : 'error');
+                    if (result.success) {
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                        // Update the name and headline on the left side instantly
+                        profileName.textContent = data.fullName;
+                        profileHeadline.textContent = data.headline;
+                    }
+                });
+            });
+
+             const displayMessage = (message, type = 'success') => {
+                const color = type === 'success' ? 'green' : 'red';
+                messageContainer.innerHTML = `<div class="p-4 text-sm text-${color}-700 bg-${color}-100 rounded-lg" role="alert">${message}</div>`;
+                window.scrollTo(0, 0);
+                setTimeout(() => messageContainer.innerHTML = '', 4000);
+            };
+        });
+    </script>
+</body>
+</html>
+

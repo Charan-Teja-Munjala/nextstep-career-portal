@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        fetch('api/check_session.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.loggedIn) {
+                    // If the user is not logged in, force a redirect to the login page.
+                    // Using replace() is better because it removes the dashboard from the browser's history.
+                    window.location.replace('login.html');
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                // As a fallback, redirect to login if the check fails for any reason.
+                window.location.replace('login.html');
+            });
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                    <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="user"></i>
+                        <span class="ml-3">My Profile</span>
+                    </a>
+                    <a href="my_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="book-open"></i>
+                        <span class="ml-3">My Courses</span>
+                    </a>
+                     <a href="browse_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="search"></i>
+                        <span class="ml-3">Browse Courses</span>
+                    </a>
+                    <a href="browse_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="search"></i>
+                        <span class="ml-3">Browse jobs</span>
+                    </a>
+                    <a href="applications.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg">
+                        <i data-lucide="briefcase"></i>
+                        <span class="ml-3">Applications</span>
+                    </a>
+                    <a href="roadmaps.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="map"></i>
+                        <span class="ml-3">Roadmaps</span>
+                    </a>
+                    
+                </nav>
+                <div class="mt-auto">
+                     <a href="logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="log-out"></i>
+                        <span class="ml-3">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <div class="flex items-center justify-between h-16 bg-white border-b px-4">
+                 <div>
+                     <h1 class="text-xl font-semibold text-gray-800">My Applications</h1>
+                </div>
+                 <div class="flex items-center space-x-4">
+                    <button class="p-2 text-gray-500 bg-gray-100 rounded-full hover:bg-gray-200 focus:outline-none">
+                        <i data-lucide="bell"></i>
+                    </button>
+                    <div class="relative">
+                           <img id="user-avatar-menu" src="https://placehold.co/40x40/E2E8F0/4A5568?text=U" class="w-8 h-8 rounded-full" alt="User Avatar">
+                    </div>
+                </div>
+            </div>
+            
+            <main class="p-6 md:p-8">
+                <div class="max-w-6xl mx-auto">
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b">
+                            <h2 class="text-2xl font-bold text-gray-800">Application History</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Applied</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="applications-table-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Dynamic rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('applications-table-body');
+            const avatarMenu = document.getElementById('user-avatar-menu');
+            
+             // Fetch user avatar for top right corner
+            fetch(`api/profile_handler.php?t=${new Date().getTime()}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.avatar_url) {
+                        avatarMenu.src = data.avatar_url;
+                    }
+                });
+
+            // --- Fetch and display applications ---
+            fetch(`api/applications_handler.php?t=${new Date().getTime()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                         window.location.href = 'login.html';
+                    } else if (data.length === 0) {
+                        // Display a message if no applications are found
+                        const row = tableBody.insertRow();
+                        const cell = row.insertCell();
+                        cell.colSpan = 4;
+                        cell.className = 'px-6 py-12 text-center text-gray-500';
+                        cell.textContent = 'You have not applied to any jobs yet.';
+                    } else {
+                        // Populate the table with application data
+                        data.forEach(app => {
+                            const row = tableBody.insertRow();
+                            
+                            // Define status badge colors
+                            let statusColor = 'bg-blue-100 text-blue-800';
+                            if (app.status.toLowerCase() === 'interviewing') statusColor = 'bg-yellow-100 text-yellow-800';
+                            if (app.status.toLowerCase() === 'offer') statusColor = 'bg-green-100 text-green-800';
+                            if (app.status.toLowerCase() === 'rejected') statusColor = 'bg-red-100 text-red-800';
+
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">${app.job_title}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-700">${app.company_name}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-700">${app.applied_date_formatted}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
+                                        ${app.status}
+                                    </span>
+                                </td>
+                            `;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching applications data:', error);
+                    const row = tableBody.insertRow();
+                    const cell = row.insertCell();
+                    cell.colSpan = 4;
+                    cell.className = 'px-6 py-12 text-center text-red-500';
+                    cell.textContent = 'Could not load your applications.';
+                });
+        });
+    </script>
+</body>
+</html>

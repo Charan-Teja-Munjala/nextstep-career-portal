@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course - NextStep Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        fetch('api/check_session.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.loggedIn) {
+                    // If the user is not logged in, force a redirect to the login page.
+                    // Using replace() is better because it removes the dashboard from the browser's history.
+                    window.location.replace('login.html');
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                // As a fallback, redirect to login if the check fails for any reason.
+                window.location.replace('login.html');
+            });
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .sticky-container {
+            position: sticky;
+            top: 1rem;
+            z-index: 10;
+        }
+        .lesson-item.active-lesson {
+            background-color: #E0E7FF; /* A light indigo */
+            color: #3730A3;
+            font-weight: 600;
+        }
+        .lesson-item.active-lesson i {
+            color: #4F46E5;
+        }
+        .lesson-item.completed-lesson {
+            color: #166534; /* A dark green */
+        }
+        .lesson-item.completed-lesson .lesson-title {
+            text-decoration: line-through;
+            color: #52525B;
+        }
+        .prose-styles {
+            max-width: 100%;
+            padding: 1rem 2rem;
+        }
+        .prose-styles h1, .prose-styles h2 { font-weight: bold; margin-bottom: 1rem; }
+        .prose-styles p { line-height: 1.6; margin-bottom: 1rem; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="hidden md:flex flex-col w-64 bg-white border-r">
+            <div class="flex items-center justify-center h-16 border-b">
+                <span class="text-2xl font-bold text-indigo-600">NextStep Hub</span>
+            </div>
+            <div class="flex flex-col flex-grow p-4">
+                <nav class="flex-grow space-y-2">
+                         <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                             <i data-lucide="layout-dashboard"></i><span class="ml-3">Dashboard</span>
+                         </a>
+                         <a href="profile.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                             <i data-lucide="user"></i><span class="ml-3">My Profile</span>
+                         </a>
+                         <a href="my_courses.html" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg">
+                             <i data-lucide="book-open"></i><span class="ml-3">My Courses</span>
+                         </a>
+                         <a href="browse_courses.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                             <i data-lucide="search"></i><span class="ml-3">Browse Courses</span>
+                         </a>
+                          <a href="browse_jobs.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                             <i data-lucide="briefcase"></i><span class="ml-3">Browse Jobs</span>
+                         </a>
+                         <a href="applications.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                             <i data-lucide="file-text"></i><span class="ml-3">Applications</span>
+                         </a>
+                         <a href="roadmaps.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                             <i data-lucide="map"></i><span class="ml-3">Roadmaps</span>
+                         </a>
+                </nav>
+                <div class="mt-auto">
+                    <a href="logout.php" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">
+                        <i data-lucide="log-out"></i><span class="ml-3">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col flex-1 overflow-y-auto">
+            <header class="flex items-center justify-between h-16 bg-white border-b px-6 sticky top-0 z-20">
+                <h1 id="course-title-header" class="text-xl font-semibold text-gray-800">Loading Course...</h1>
+            </header>
+            
+            <main id="main-content" class="flex-grow p-6 md:p-8">
+                <!-- Content will be dynamically loaded here -->
+            </main>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.getElementById('main-content');
+            const courseTitleHeader = document.getElementById('course-title-header');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const courseId = urlParams.get('id');
+
+            if (!courseId) {
+                mainContent.innerHTML = `<div class="text-center py-20"><p class="text-red-500">No course selected.</p></div>`;
+                return;
+            }
+
+            let allLessonsData = {};
+            let orderedLessons = []; 
+            let currentLessonId = null;
+            let totalLessons = 0;
+            let completedLessons = new Set();
+            let certificateUid = null;
+
+            function updateProgressBar() {
+                const progressDiv = document.getElementById('progress-container');
+                 if (certificateUid && completedLessons.size === totalLessons && totalLessons > 0) {
+                    progressDiv.innerHTML = `<a href="view_certificate.html?uid=${certificateUid}" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center text-sm"><i data-lucide="award" class="w-4 h-4 mr-2"></i>View Certificate</a>`;
+                    lucide.createIcons();
+                    return;
+                }
+                const progress = totalLessons > 0 ? Math.round((completedLessons.size / totalLessons) * 100) : 0;
+                document.getElementById('progress-text').textContent = `${progress}% Complete`;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+            }
+
+            fetch(`api/course_view_handler.php?id=${courseId}&t=${new Date().getTime()}`)
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to load course data'))
+                .then(data => {
+                    courseTitleHeader.textContent = data.title;
+                    (data.completed_lessons || []).forEach(id => completedLessons.add(parseInt(id)));
+                    if (data.certificate_uid) certificateUid = data.certificate_uid;
+                    
+                    mainContent.innerHTML = `
+                        <div class="max-w-7xl mx-auto">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-8">
+                                <div class="lg:col-span-2">
+                                    <div class="sticky-container">
+                                        <div id="content-display-area" class="bg-white rounded-lg shadow-lg overflow-hidden mb-4 aspect-video"></div>
+                                        <div id="completion-area" class="my-4 flex items-center justify-between"></div>
+                                    </div>
+                                    <div class="bg-white rounded-lg shadow-sm p-8 my-8">
+                                        <h2 class="text-3xl font-bold text-gray-800 mb-4">${data.title}</h2>
+                                        <p class="text-gray-500 mb-4">By ${data.organization_name}</p>
+                                        <p class="text-gray-700 leading-relaxed">${data.description}</p>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-1 mt-8 lg:mt-0">
+                                    <div class="bg-white rounded-lg shadow-sm">
+                                        <div class="p-4 border-b flex justify-between items-center">
+                                            <h3 class="text-xl font-bold text-gray-800">Course Content</h3>
+                                            <div id="progress-container" class="text-right">
+                                                <span id="progress-text" class="text-sm font-medium text-indigo-600">0% Complete</span>
+                                                <div class="w-24 bg-gray-200 rounded-full h-2 mt-1">
+                                                    <div id="progress-bar" class="bg-indigo-600 h-2 rounded-full" style="width: 0%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="accordion-container" class="max-h-[70vh] overflow-y-auto"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const accordionContainer = document.getElementById('accordion-container');
+                    let firstLesson = null;
+                    totalLessons = 0;
+                    orderedLessons = [];
+
+                    if(data.modules && data.modules.length > 0) {
+                        data.modules.forEach(module => {
+                            module.lessons.forEach(lesson => {
+                                totalLessons++;
+                                allLessonsData[lesson.id] = lesson;
+                                orderedLessons.push(lesson.id); 
+                                if (!firstLesson) firstLesson = lesson;
+                            });
+                        });
+                        
+                        data.modules.forEach(module => {
+                            const moduleEl = document.createElement('div');
+                            moduleEl.className = 'border-b';
+                            let lessonsHtml = '';
+                            module.lessons.forEach(lesson => {
+                                const isCompleted = completedLessons.has(lesson.id);
+                                const completedClass = isCompleted ? 'completed-lesson' : '';
+                                const icon = isCompleted ? 'check-circle-2' : (lesson.lesson_type === 'video' ? 'youtube' : 'file-text');
+
+                                lessonsHtml += `<div class="pl-12 pr-6 py-3 hover:bg-gray-100 cursor-pointer lesson-item ${completedClass}" data-lesson-id="${lesson.id}"><div class="flex items-center"><i data-lucide="${icon}" class="w-4 h-4 mr-3 ${isCompleted ? 'text-green-600' : 'text-gray-500'}"></i><span class="lesson-title">${lesson.title}</span></div></div>`;
+                            });
+                            moduleEl.innerHTML = `<button class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-50 accordion-header"><span class="font-semibold text-lg">${module.title}</span><i data-lucide="chevron-down" class="transition-transform"></i></button><div class="accordion-content bg-white">${lessonsHtml}</div>`;
+                            accordionContainer.appendChild(moduleEl);
+                        });
+
+                        updateProgressBar();
+                        lucide.createIcons();
+                        
+                        if (firstLesson) {
+                            displayLessonContent(firstLesson);
+                            const firstLessonEl = document.querySelector('.lesson-item');
+                            if(firstLessonEl) firstLessonEl.classList.add('active-lesson');
+                        }
+
+                        document.querySelectorAll('.accordion-header').forEach(header => {
+                            header.addEventListener('click', () => {
+                                const content = header.nextElementSibling;
+                                if (content.style.maxHeight) { content.style.maxHeight = null; } else { content.style.maxHeight = content.scrollHeight + "px"; }
+                            });
+                        });
+                        
+                        const firstAccordion = document.querySelector('.accordion-header');
+                        if(firstAccordion) firstAccordion.click();
+
+                        document.querySelectorAll('.lesson-item').forEach(item => {
+                            item.addEventListener('click', () => {
+                                const lessonId = item.dataset.lessonId;
+                                displayLessonContent(allLessonsData[lessonId]);
+                            });
+                        });
+
+                    } else {
+                        accordionContainer.innerHTML = '<p class="p-6 text-gray-500">No content available.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching course data:', error);
+                    mainContent.innerHTML = `<div class="text-center py-20"><p class="text-red-500">Could not load course details.</p></div>`;
+                });
+
+            const displayLessonContent = (lesson) => {
+                currentLessonId = lesson.id;
+                document.querySelectorAll('.lesson-item').forEach(i => i.classList.remove('active-lesson'));
+                document.querySelector(`.lesson-item[data-lesson-id="${currentLessonId}"]`).classList.add('active-lesson');
+
+                const contentArea = document.getElementById('content-display-area');
+                const completionArea = document.getElementById('completion-area');
+                let contentHtml = '';
+
+                switch (lesson.lesson_type) {
+                    case 'video':
+                        contentArea.className = 'bg-black rounded-lg shadow-lg overflow-hidden mb-6 aspect-video';
+                        let videoUrl = lesson.video_url || '';
+                        if (videoUrl.includes('?')) { videoUrl += '&autoplay=1&enablejsapi=1'; } else { videoUrl += '?autoplay=1&enablejsapi=1'; }
+                        contentHtml = `<iframe class="w-full h-full" src="${videoUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                        break;
+                    case 'reading':
+                        contentArea.className = 'bg-white rounded-lg shadow-lg overflow-y-auto mb-6 aspect-video prose-styles';
+                        contentHtml = `<div class="p-6 h-full">${lesson.content.replace(/\n/g, '<br>')}</div>`;
+                        break;
+                    case 'document':
+                        contentArea.className = 'bg-white rounded-lg shadow-lg overflow-hidden mb-6 aspect-video';
+                        contentHtml = `<iframe class="w-full h-full" src="${lesson.content}" title="Document Viewer"></iframe>`;
+                        break;
+                }
+                contentArea.innerHTML = contentHtml;
+                
+                const currentIndex = orderedLessons.indexOf(currentLessonId);
+                const isFirstLesson = currentIndex === 0;
+                const isLastLesson = currentIndex === orderedLessons.length - 1;
+
+                let prevButton = `<button id="prev-lesson-btn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 flex items-center"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Previous</button>`;
+                if (isFirstLesson) { prevButton = `<div class="w-36"></div>`; }
+
+                let completeButton;
+                if (certificateUid && completedLessons.size === totalLessons) {
+                    completeButton = `<a href="view_certificate.html?uid=${certificateUid}" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 flex items-center"><i data-lucide="award" class="w-5 h-5 mr-2"></i>View Certificate</a>`;
+                } else if (completedLessons.has(lesson.id)) {
+                    completeButton = `<button class="font-semibold text-green-600 flex items-center" disabled><i data-lucide="check-circle" class="w-5 h-5 mr-2"></i>Completed</button>`;
+                } else {
+                    completeButton = `<button id="mark-complete-btn" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700">Mark as Complete</button>`;
+                }
+                
+                let nextButton = `<button id="next-lesson-btn" class="bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-800 flex items-center">Next <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i></button>`;
+                if (isLastLesson) { nextButton = `<div class="w-32"></div>`; }
+                
+                completionArea.innerHTML = `${prevButton} ${completeButton} ${nextButton}`;
+                lucide.createIcons();
+            };
+
+            document.addEventListener('click', e => {
+                const markCompleteBtn = e.target.closest('#mark-complete-btn');
+                const navigateBtn = e.target.closest('#next-lesson-btn, #prev-lesson-btn');
+
+                if (markCompleteBtn) {
+                    markCompleteBtn.disabled = true;
+                    markCompleteBtn.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>`;
+                    fetch('api/course_view_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mark_complete', lesson_id: currentLessonId }) })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            completedLessons.add(currentLessonId);
+                            const lessonEl = document.querySelector(`.lesson-item[data-lesson-id="${currentLessonId}"]`);
+                            if (lessonEl) {
+                                lessonEl.classList.add('completed-lesson');
+                                lessonEl.querySelector('i').outerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 mr-3 text-green-600"></i>`;
+                            }
+                            if(result.certificate_uid) {
+                                certificateUid = result.certificate_uid;
+                            }
+                            updateProgressBar();
+                            displayLessonContent(allLessonsData[currentLessonId]);
+                        } else {
+                            alert('Could not mark as complete. Please try again.');
+                            displayLessonContent(allLessonsData[currentLessonId]); 
+                        }
+                    });
+                }
+                
+                if (navigateBtn) {
+                    const direction = navigateBtn.id === 'next-lesson-btn' ? 'next' : 'previous';
+                    const currentIndex = orderedLessons.indexOf(currentLessonId);
+                    const nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+                    
+                    if (nextIndex >= 0 && nextIndex < orderedLessons.length) {
+                        const nextLessonId = orderedLessons[nextIndex];
+                        const nextLessonEl = document.querySelector(`.lesson-item[data-lesson-id="${nextLessonId}"]`);
+                        if (nextLessonEl) {
+                            const accordionContent = nextLessonEl.closest('.accordion-content');
+                            if(accordionContent && !accordionContent.style.maxHeight){
+                                accordionContent.previousElementSibling.click();
+                            }
+                            nextLessonEl.click();
+                            nextLessonEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                }
+            });
+        });
+
+        
+    </script>
+</body>
+</html>
+
